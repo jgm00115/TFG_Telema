@@ -1,0 +1,27 @@
+{
+  "name": "streaming_audio_inmersivo",
+  "version": "1.0.0",
+  "description": "servicio de streaming de audio de carácter inmersivo para",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jgm00115/TFG_Telema.git"
+  },
+  "keywords": [
+    "streaming",
+    "audio",
+    "inmersivo"
+  ],
+  "author": "Jaime García",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jgm00115/TFG_Telema/issues"
+  },
+  "homepage": "https://github.com/jgm00115/TFG_Telema#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
