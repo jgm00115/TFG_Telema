@@ -2,3 +2,5 @@
 /mediaStream
 /audio
 /node_modules
+/client/.gitignore
+/client/readme.md
