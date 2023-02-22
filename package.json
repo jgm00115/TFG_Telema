@@ -4,6 +4,7 @@
   "description": "servicio de streaming de audio de carácter inmersivo para",
   "main": "index.js",
   "scripts": {
+    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
