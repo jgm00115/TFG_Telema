@@ -1,6 +1,13 @@
 .DS_Store
 /mediaStream
-/audio
+/audio/*
+!/audio/Unaligned
 /node_modules
 /client/.gitignore
 /client/readme.md
+/client/node_modules
+/public/multichannel_*
+/media
+/shScripts/*
+!/shScripts/webmTranscoding.zsh
+!/shScripts/webm2Dash.zsh

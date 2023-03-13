@@ -1,6 +1,8 @@
 import logo from './logo.svg';
+import Player from './Stream.jsx'
 import './App.css';
 
+/*
 function App() {
   return (
     <div className="App">
@@ -20,6 +22,13 @@ function App() {
       </header>
     </div>
   );
+}
+*/
+
+function App() {
+  return (
+    <Player />
+  )
 }
 
 export default App;
