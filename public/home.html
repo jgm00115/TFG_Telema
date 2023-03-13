@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <style>
+        * {
+            margin:0;
+            padding:0;
+            display:flex;
+            flex-direction: column;
+        }
+    </style>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Page Title</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <!-- Importa hls.js-->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-
+    <!-- Importa dash.js-->
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 </head>
 <body>
-
-    <button id="play">Play</button>
-    <button id="pause">Pause</button><br>
-    <p>Ganancia fuente 1</p>
-    <input type="range" min="0" max="100" id="volume_src1">
-    <p>Ganancia fuente 2</p>
-    <input type="range" min="0" max="100" id="volume_src2">
-
-    <script src="./script.js"></script>
-
+    <script src="./multiChannel.js"></script>
 </body>
 </html>

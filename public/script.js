@@ -1,9 +1,5 @@
-// Botones de play, pause y slider de volumen
-play = document.getElementById("play")
-pause = document.getElementById("pause")
-volume_slider_src1 = document.getElementById("volume_src1")
-volume_slider_src2 = document.getElementById("volume_src2")
 
+/*
 // Crea audio context y fuentes de audio
 const audioCtx = new AudioContext()
 
@@ -85,3 +81,5 @@ function setSource(audio, src){
       hls.attachMedia(audio);
     }
 }
+
+*/
