@@ -1,7 +1,6 @@
 .DS_Store
 /mediaStream
 /audio/*
-!/audio/Unaligned
 /node_modules
 /client/.gitignore
 /client/readme.md
