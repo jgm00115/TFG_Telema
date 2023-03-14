@@ -1,7 +1,10 @@
+// URL manifiesto dash
 const src = '/media/Unaligned/manifest.mpd'
 
+// Instancia reproductor dash
 const player = dashjs.MediaPlayer().create()
 
+// Reserva espacio para los tracks de audio
 let audioTracks = []
 
 // Ajusta la longitud máxima del buffer y el tiempo de refresco del mismo
@@ -16,58 +19,82 @@ player.updateSettings({
     }
 })
 
+// Crea un nuevo elemento de audio
 const audio = new Audio()
-const Nchannels = 30
 
+// Añade controles  al elemento de audio
 audio.setAttribute('controls','controls')
+
 document.body.appendChild(audio)
 
-audio.addEventListener('play', ()=>{
-    
-    //Genera sliders para controlar la ganancia de cada canal
+// Crea el track selector y la cadena de audio cuando el contenido puede reproducirse
+let initialized = false
 
-    for(let i = 0; i < Nchannels; i++){
+const audioCtx = new AudioContext()
 
-        let slider = document.createElement('input')
-        slider.setAttribute('type','range')
-        slider.setAttribute('min','0')
-        slider.setAttribute('max','1')
-        slider.setAttribute('step','0.1')
-        slider.setAttribute('value','0')
-        slider.setAttribute('id',i)
-        slider.addEventListener('input', (event) => {
+audio.addEventListener('canplay', () => {
 
-            // Asigna el valor del slider al nodo de ganancia correspondiente
-            let id = event.target.id
-            let gain = event.target.value
-
-            gainNodes[id].gain.value = gain
-
-        })
-        
-        // Añade los sliders al documento
-        document.body.appendChild(slider)
+    // Si ya se ha inicializado, vuelve
+    if(initialized) {
+        console.log('Cadena de audio ya inicializada')
+        return
     }
 
-    //Inicializa el audioContext
-    const audioCtx = new AudioContext()
+    // Toma el número de tracks que existen
+    let tracks = player.getTracksFor('audio')
+    console.log(`Número de tracks disponibles = ${tracks.length}`)
 
-    //Crea una fuente de audio y un splitter
+    // Track selector
+    let trackSelector = document.createElement('select')
+
+    for (let i = 0; i < tracks.length; i++ ){
+        
+        let track = document.createElement('option')
+        track.text = `Track ${i}`
+        trackSelector.add(track)
+
+    }
+
+    // Selecciona el track 0 por defecto
+    player.setCurrentTrack(tracks[0])
+
+    // Cambia el track seleccionado
+    trackSelector.addEventListener('input', (event)=> {
+
+        player.setCurrentTrack(tracks[event.target.selectedIndex])
+        
+    })
+
+    // Añade el track selector al documento
+    document.body.appendChild(trackSelector)
+
+    // Comprueba cuántos canales tiene cada track
+    let nchannels = []
+    for (track of tracks) {
+        nchannels.push(track.audioChannelConfiguration)
+    }
+
+    // Obtiene el número máximo de canales
+    maxChannelNumber = Math.max(...nchannels)
+    console.log(`Máximo número de canales = ${maxChannelNumber}`)
+
+    // Cadena de audio
+    // Nodo fuente
     const srcNode = audioCtx.createMediaElementSource(audio)
-    srcNode.channelCount = Nchannels
+    srcNode.channelCount = maxChannelNumber
     srcNode.channelInterpretation = 'discrete'
-    const splitterNode = audioCtx.createChannelSplitter(Nchannels)
 
-    //Conecta la fuente al splitter
+    // Splitter con el número máximo de canales
+    const splitterNode = audioCtx.createChannelSplitter(maxChannelNumber)
+
+    // Conecta fuente a splitter
     srcNode.connect(splitterNode)
-    
-    //Inicializa el array de nodos de ganancia
+
+    // Crea tantos nodos de ganancia como canales
     let gainNodes = []
 
-    //Crea nodos de ganancia para cada canal
-    for(let i = 0; i<Nchannels; i++){
-        
-        // Añade un nuevo nodo de ganancia
+    for(let i = 0; i<maxChannelNumber; i++) {
+
         gainNodes.push(audioCtx.createGain())
 
         // Conecta el splitter al nodo de ganancia
@@ -80,36 +107,34 @@ audio.addEventListener('play', ()=>{
         gainNodes[i].gain.value = 0
 
     }
-    audioTracks = player.getTracksFor('audio')
-    console.log(`Tracks para audio ${JSON.stringify(audioTracks)}`)
+
+    // Crea faders de volumen para cada canal
+    for (let i = 0; i < maxChannelNumber; i++) {
+
+        let fader = document.createElement('input')
+        fader.setAttribute('type','range')
+        fader.setAttribute('min','0')
+        fader.setAttribute('max','1')
+        fader.setAttribute('step','0.1')
+        fader.setAttribute('value','0')
+        fader.setAttribute('id',i)
+        
+        // Modifica la ganancia del nodo correspondiente
+        fader.addEventListener('input', (event) => {
+
+            let id = event.target.id
+            let gain = event.target.value
+
+            gainNodes[id].gain.value = gain
+        })
+
+        // Añade los faders al documento
+        document.body.appendChild(fader)
+    }
+
+    initialized = true
 
 })
 
+// Inicia el reproductor dash
 player.initialize(audio,src,true)
-
-// Permite cambiar el track de audio
-let trackSelector = document.createElement('select')
-
-let track0 = document.createElement('option')
-let track1 = document.createElement('option')
-let track2 = document.createElement('option')
-let track3 = document.createElement('option')
-
-track0.text = 'Track 0'
-track1.text = 'Track 1'
-track2.text = 'Track 2'
-track3.text = 'Track 3'
-
-trackSelector.add(track0)
-trackSelector.add(track1)
-trackSelector.add(track2)
-trackSelector.add(track3)
-
-trackSelector.addEventListener('input', (event) => {
-
-    console.log(`Selected index = ${event.target.selectedIndex}`)
-    player.setCurrentTrack(audioTracks[event.target.selectedIndex])
-
-})
-
-document.body.appendChild(trackSelector)
