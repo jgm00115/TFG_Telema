@@ -36,3 +36,8 @@
     transform: rotate(360deg);
   }
 }
+
+input[type='range'] {
+  -webkit-appearance: slider-vertical;
+  width:40px;
+}

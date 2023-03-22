@@ -1,5 +1,5 @@
 import logo from './logo.svg';
-import Player from './Stream.jsx'
+import Stream from './components/Stream.jsx'
 import './App.css';
 
 /*
@@ -27,7 +27,9 @@ function App() {
 
 function App() {
   return (
-    <Player />
+    <Stream
+      mediaURL={'/media/Unaligned/manifest.mpd'}
+    />
   )
 }
 
