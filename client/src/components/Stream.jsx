@@ -30,11 +30,12 @@ export default function Stream({ mediaURL }) {
         // Inicializa el reproductor dash y lo vincula al elemento de audio
         player.current.updateSettings({
             streaming: {
+                cacheInitSegments: true,
                 buffer: {
-                    bufferTimeAtTopQuality: 30,
-                    bufferTimeAtTopQualityLongForm: 30,
-                    stableBufferTime: 30,
-                    longFormContentDurationThreshold: 30,
+                    // bufferTimeAtTopQuality: 30,
+                    // bufferTimeAtTopQualityLongForm: 30,
+                    // stableBufferTime: 30,
+                    // longFormContentDurationThreshold: 30,
                 }
             }
         })
@@ -42,6 +43,11 @@ export default function Stream({ mediaURL }) {
         player.current.initialize(audioRef.current, mediaURL, true);
 
     }, []);
+
+    // Dispara el evento cuando el reproductor se para porque le falta data
+    player.current.on(dashjs.MediaPlayer.events.PLAYBACK_WAITING, (e)=> {
+        console.log(`Evento ${JSON.stringify(e)}`)
+    })
 
     // Se ejecuta cuando ganancias se actualicen
     useEffect(() => {
@@ -93,7 +99,7 @@ export default function Stream({ mediaURL }) {
         console.log(`Número de canales por track = ${numChannels.current}`);
 
         // Actualiza el número de ganancias necesarias
-        setGains(Array(Math.max(...numChannels.current)).fill(0))
+        setGains(Array(Math.max(...numChannels.current)).fill(0.5))
     }
 
     const onPlay = () => {
