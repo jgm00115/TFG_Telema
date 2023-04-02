@@ -2,6 +2,8 @@ import dashjs from 'dashjs'
 import Mixer from './Mixer'
 import TrackSelector from './TrackSelector';
 
+import {AudioChain} from './AudioChain';
+
 import { useRef, useEffect, useState } from 'react'
 
 export default function Stream({ mediaURL }) {
@@ -10,13 +12,8 @@ export default function Stream({ mediaURL }) {
     const numChannels = useRef(0);
     const audioRef = useRef(null);
     const player = useRef(dashjs.MediaPlayer().create());
-
-    const audioChainInitialized = useRef(false);
-    const audioCtx = useRef(null);
-    const srcNode = useRef(null);
-    const splitterNode = useRef(null);
-    const gainNodes = useRef(Array(0));
-
+    
+    const audioChain = useRef(null);
 
     // Variables con estado (cada vez que cambien, los componentes se re-renderizan)
     const [numTracks, setNumTracks] = useState(0);
@@ -55,12 +52,10 @@ export default function Stream({ mediaURL }) {
         console.log(`Ganancias = ${gains}`);
 
         // SI LA CADENA DE AUDIO ESTÁ INICIALIZADA
-        if (audioChainInitialized.current) {
+        if (audioChain.current != null) {
 
             // Actualiza nodos de ganancia
-            for (let i = 0; i < gains.length; i++) {
-                gainNodes.current[i].gain.value = gains[i];
-            }
+            audioChain.current.setFadersGain(gains);
             
         }
 
@@ -71,7 +66,7 @@ export default function Stream({ mediaURL }) {
 
         console.log(`Track activo = ${track}`);
         
-        if (audioChainInitialized.current) {
+        if (audioChain.current != null) {
 
             // Actualiza track activo
 
@@ -104,48 +99,22 @@ export default function Stream({ mediaURL }) {
 
     const onPlay = () => {
         // SI CADENA DE AUDIO ESTÁ INICIALIZADA, VUELVE
-        if (audioChainInitialized.current)
+        if (audioChain.current != null)
             return;
 
         // INICIALIZA CADENA DE AUDIO 
-        // Crea un audio context
-        audioCtx.current = new AudioContext();
-
-        // Crea un nodo fuente
-        srcNode.current = audioCtx.current.createMediaElementSource(audioRef.current);
-
-        srcNode.current.channelCount = Math.max(...numChannels.current);
-        srcNode.current.channelInterpretation = 'discrete';
-        // Crea un splitter con tantas salidas como máximo número de canales hay
-        splitterNode.current = audioCtx.current.createChannelSplitter(Math.max(...numChannels.current));
-
-        // Conecta el nodo fuente al splitter
-        srcNode.current.connect(splitterNode.current);
-
-        // Crea nodos de ganancia
-        for (let i = 0; i < gains.length; i++) {
-
-            gainNodes.current.push(audioCtx.current.createGain());
-
-            // Conecta la salida del splitter al nodo de ganancia correspondiente
-            splitterNode.current.connect(gainNodes.current[i], i);
-
-            // Conecta el nodo de ganancia a la salida
-            gainNodes.current[i].connect(audioCtx.current.destination);
-        }
-
+        audioChain.current = new AudioChain(audioRef.current,numTracks,numChannels.current);
+        
         // Asigna ganancias por defecto
-        for (let i = 0; i < gains.length; i++) {
-            gainNodes.current[i].gain.value = gains[i];
-        }
+        audioChain.current.setFadersGain(gains);
 
         // Selecciona el track 0 por defecto
         const tracks = player.current.getTracksFor('audio');
 
         player.current.setCurrentTrack(tracks[0]);
 
-        // Cadena de audio inicializada
-        audioChainInitialized.current = true;
+        console.log(`Cadena de audio inicializada`);
+
     }
 
     return (
