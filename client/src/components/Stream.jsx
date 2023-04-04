@@ -10,7 +10,8 @@ export default function Stream({ mediaURL }) {
 
     // Variables sin estado (su valor persiste entre re-renderizados)
     const numTracks = useRef(0);                            // número de tracks de audio total
-    const numChannels = useRef(0);                          // canales de audio por track (array)
+    const trackNames = useRef(Array(0));                    // nombre de los tracks de audio
+    const numChannels = useRef(Array(0));                   // canales de audio por track (array)
     const audioRef = useRef(null);                          // html audio media element 
     const player = useRef(dashjs.MediaPlayer().create());   // dash player
 
@@ -84,6 +85,14 @@ export default function Stream({ mediaURL }) {
         const tracks = player.current.getTracksFor('audio');
         numTracks.current = tracks.length;
 
+        // Actualiza el nombre de los tracks
+        let trackLangs = [];
+        for (let trackL of tracks){
+            trackLangs.push(trackL.lang);
+        }
+
+        trackNames.current = trackLangs;
+
         console.log(`Número de tracks de audio = ${numTracks.current}`);
 
         // Actualiza el número de canales de audio disponibles
@@ -97,7 +106,7 @@ export default function Stream({ mediaURL }) {
 
         // INICIALIZA CADENA DE AUDIO
         audioChain.current = new AudioChain(audioRef.current,
-            numTracks.current, maxNumChannels, maxNumChannels, defaultGain);
+            numTracks.current, maxNumChannels, maxNumChannels);
 
         console.log(`Nueva cadena de audio creada`);
 
@@ -121,6 +130,7 @@ export default function Stream({ mediaURL }) {
                 numTracks={numTracks.current}
                 track={track}
                 setTrack={setTrack}
+                trackNames={trackNames.current}
             />
 
             <Mixer

@@ -57,7 +57,7 @@ export class AudioChain {
     * @param {} audioRef - Audio media element (dash player está vinculado a este elemento)
     * @param {int} defaultGain - Ganancia aplicada por defecto a todos los faders al inicializarlos
     */
-    initialize(audioRef, defaultGain) {
+    initialize(audioRef) {
 
         // Inicializa el audioContext
         this._audioCtx = new AudioContext();

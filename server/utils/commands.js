@@ -3,11 +3,12 @@ const { spawn } = require('child_process');
 /** 
 * Genera los fragmentos y el manifiesto para VOD
 * @param {string[]} inputFilePaths - Rutas a los ficheros .wav de audio
+* @param {string[]} languages - Nombre de los instrumentos (se incrusta como metadatos de lenguage para cada stream)
 * @param {string} outputFolder - Ruta a la carpeta donde almacenar los ficheros de salida generados
 * @returns {Promise} - Una promise que se resuelve cuando todos los archivos han sido trascodificados y almacenados en la carpeta de salida
 */
 
-function OnDemand(inputFilePaths, outputFolder) {
+function OnDemand(inputFilePaths, languages, outputFolder) {
 
     let command = `ffmpeg `;
     let adaptation_sets = `-adaptation_sets "`;
@@ -22,10 +23,9 @@ function OnDemand(inputFilePaths, outputFolder) {
     // Mapea cada stream de audio de entrada para trascodificar
     for (let n = 0; n < (inputFilePaths.length); n++) {
 
-        command += `-map ${n}:a -c:a libopus -mapping_family 255 -vn `;
-
-        // command += `${outputFolder}/${outputFilenames[n]} `
-
+        // trascodifica y añade metadatos del tipo de instrumento (lenguage)
+        command += `-map ${n}:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:${n} language=${languages[n]} `;
+        
         adaptation_sets += `id=${n},streams=${n} `;
     }
 
@@ -70,7 +70,7 @@ function OnDemand(inputFilePaths, outputFolder) {
 * @param {string[]} inputFilePaths - Rutas a los ficheros .wav de audio
 * @param {string} outputFolder - Ruta a la carpeta donde almacenar los ficheros de salida generados
 */
-function LiveStreaming(inputFilePaths, outputFolder) {
+function LiveStreaming(inputFilePaths,languages, outputFolder) {
 
     let command = `ffmpeg -re `;
     let adaptation_sets = `-adaptation_sets "`;
@@ -85,9 +85,8 @@ function LiveStreaming(inputFilePaths, outputFolder) {
     // Mapea cada stream de audio de entrada para trascodificar
     for (let n = 0; n < (inputFilePaths.length); n++) {
 
-        command += `-map ${n}:a -c:a libopus -mapping_family 255 -vn `;
-
-        // command += `${outputFolder}/${outputFilenames[n]} `
+        // trascodifica y añade metadatos del tipo de instrumento (lenguage)
+        command += `-map ${n}:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:${n} language=${languages[n]} `;
 
         adaptation_sets += `id=${n},streams=${n} `;
     }
