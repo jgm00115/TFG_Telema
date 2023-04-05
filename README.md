@@ -2,7 +2,7 @@
 Servicio de streaming de audio de carácter inmersivo para retransmitir actuaciones de música clásica
 
 ## Distribución de contenido
-Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de `[dash.js](https://github.com/Dash-Industry-Forum/dash.js/)`para la reproducción del contenido.
+Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de [dash.js](https://github.com/Dash-Industry-Forum/dash.js/)para la reproducción del contenido.
 
 ## Ingesta de media
 Se emplea `ffmpeg` para la transcodificación y empaquetado de audio. Para subir contenido al servidor se usa el endpoint`http://localhost:8080/ingest/:stream_key/:filename`.
@@ -23,3 +23,6 @@ ffmpeg -re \
 -adaptation_sets "id=0,streams=0 id=1,streams=1 id=2,streams=2 id=3,streams=3 " \
 http://localhost:8080/ingest/test/manifest.mpd
 ```
+En la transcodificación y empaquetado se emplea el codec `Opus` y contenedores `WebM`. Las etiquetas de `language` en los metadatos de cada stream sirven para identificar al instrumento correspondiente.
+
+Cada señal de audio se corresponde con un track del stream especificándolo en los `adaptation_sets`. Durante la reproducción se puede seleccionar interactivamente uno de estos tracks, el servidor envía al cliente únicamente el audio perteneciente al track seleccionado.**Todos los tracks pertenecientes al stream están sincronizados**.
