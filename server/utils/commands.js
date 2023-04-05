@@ -70,7 +70,7 @@ function OnDemand(inputFilePaths, languages, outputFolder) {
 * @param {string[]} inputFilePaths - Rutas a los ficheros .wav de audio
 * @param {string} outputFolder - Ruta a la carpeta donde almacenar los ficheros de salida generados
 */
-function LiveStreaming(inputFilePaths,languages, outputFolder) {
+function LiveStreaming(inputFilePaths,languages, stream_key) {
 
     let command = `ffmpeg -re `;
     let adaptation_sets = `-adaptation_sets "`;
@@ -96,7 +96,7 @@ function LiveStreaming(inputFilePaths,languages, outputFolder) {
     command += adaptation_sets + '" ';
 
     // Output
-    command += `${outputFolder}/manifest.mpd`;
+    command += `http://localhost:8080/ingest/${stream_key}/manifest.mpd`;
 
     console.log(`EJECUTANDO COMANDO: \n ${command} \n\n\n`)
 

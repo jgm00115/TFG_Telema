@@ -1,2 +1,25 @@
-# TFG_Telema
+# TFG Telema
 Servicio de streaming de audio de carácter inmersivo para retransmitir actuaciones de música clásica
+
+## Distribución de contenido
+Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de `[dash.js](https://github.com/Dash-Industry-Forum/dash.js/)`para la reproducción del contenido.
+
+## Ingesta de media
+Se emplea `ffmpeg` para la transcodificación y empaquetado de audio. Para subir contenido al servidor se usa el endpoint`http://localhost:8080/ingest/:stream_key/:filename`.
+
+Por ejemplo, el siguiente comando envia un pseudostream con 4 fuentes de audio:
+
+```bash
+ffmpeg -re \
+-i ../audio/Unaligned/cello.wav \
+-i ../audio/Unaligned/flute.wav \
+-i ../audio/Unaligned/vn_1.wav \
+-i ../audio/Unaligned/main.wav \
+-map 0:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:0 language=cello \
+-map 1:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:1 language=flute \
+-map 2:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:2 language=violin \
+-map 3:a -c:a libopus -mapping_family 255 -vn -metadata:s:a:3 language=main \
+-f dash -dash_segment_type webm -seg_duration 10 -update_period 8 \
+-adaptation_sets "id=0,streams=0 id=1,streams=1 id=2,streams=2 id=3,streams=3 " \
+http://localhost:8080/ingest/test/manifest.mpd
+```
