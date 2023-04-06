@@ -91,7 +91,7 @@ function LiveStreaming(inputFilePaths,languages, stream_key) {
         adaptation_sets += `id=${n},streams=${n} `;
     }
 
-    command += '-f dash -dash_segment_type webm -seg_duration 10 -update_period 8 ';
+    command += '-f dash -dash_segment_type webm -seg_duration 10 -update_period 10 ';
     // Añade los adaptation sets
     command += adaptation_sets + '" ';
 
