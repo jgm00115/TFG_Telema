@@ -23,10 +23,14 @@ exports.stream_ingest = (req, res) => {
     // (debería relacionarse con el stream key)
     const ingest_path = path.join(media_dir,stream_key);
 
-    fs.mkdir(ingest_path,{recursive: true}, (err) => {
-        if (err) throw err;
-        console.log(`Directorio ${ingest_path} creado`);
-    });
+    try{
+        if(!fs.existsSync(ingest_path)) {
+            fs.mkdirSync(ingest_path, {recursive: true});
+            console.log(`Directorio ${ingest_path} creado`);
+        }
+    } catch (error) {
+        console.log(error);
+    }
 
     const filename = req.params.filename;
     const filepath = path.join(ingest_path,filename);

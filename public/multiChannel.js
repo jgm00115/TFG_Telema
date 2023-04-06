@@ -13,12 +13,13 @@ startButton.addEventListener('click', () => {
     // Ajusta la longitud máxima del buffer y el tiempo de refresco del mismo
     player.updateSettings({
         streaming: {
+            cacheInitSegments: true, 
             buffer: {
-                bufferTimeAtTopQuality: 30,
-                bufferTimeAtTopQualityLongForm: 30,
-                stableBufferTime: 30,
-                longFormContentDurationThreshold: 30,
-            }
+                //initialBufferLevel: 10,
+                //stableBufferTime: 30,
+                //bufferPruningInterval: 10,
+                //bufferToKeep: 20,
+            },
         }
     })
 
@@ -34,7 +35,7 @@ startButton.addEventListener('click', () => {
     let initialized = false
 
     const audioCtx = new AudioContext()
-
+    
     audio.addEventListener('canplay', () => {
 
         // Si ya se ha inicializado, vuelve
@@ -45,8 +46,13 @@ startButton.addEventListener('click', () => {
 
         // Toma el número de tracks que existen
         let tracks = player.getTracksFor('audio')
+        console.log(`Tracks = ${JSON.stringify(tracks)}`)
         console.log(`Número de tracks disponibles = ${tracks.length}`)
+        console.log(`Instrumentos de cada track:`)
+        for (let i = 0; i < tracks.length; i++){
+            console.log(`Track ${i}: ${JSON.stringify(tracks[i].lang)}`)
 
+        }
         // Track selector
         let trackSelector = document.createElement('select')
 
@@ -79,6 +85,7 @@ startButton.addEventListener('click', () => {
 
         // Obtiene el número máximo de canales
         maxChannelNumber = Math.max(...nchannels)
+        console.log(`Canales por track = ${nchannels}`)
         console.log(`Máximo número de canales = ${maxChannelNumber}`)
 
         // Cadena de audio
@@ -107,7 +114,7 @@ startButton.addEventListener('click', () => {
             gainNodes[i].connect(audioCtx.destination)
 
             // Ganancia por defecto = 0
-            gainNodes[i].gain.value = 0
+            gainNodes[i].gain.value = 0.5
 
         }
 
@@ -119,7 +126,7 @@ startButton.addEventListener('click', () => {
             fader.setAttribute('min', '0')
             fader.setAttribute('max', '1')
             fader.setAttribute('step', '0.1')
-            fader.setAttribute('value', '0')
+            fader.setAttribute('value', '0.5')
             fader.setAttribute('id', i)
 
             // Modifica la ganancia del nodo correspondiente
@@ -141,4 +148,5 @@ startButton.addEventListener('click', () => {
 
     // Inicia el reproductor dash
     player.initialize(audio, src, true)
+    console.log(`Dashjs version = ${dashjs.Version}`)
 })
