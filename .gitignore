@@ -1,10 +1,10 @@
 .DS_Store
 /mediaStream
 /audio/*
-/node_modules
+*/node_modules
+/server/test.js
 /client/.gitignore
 /client/readme.md
-/client/node_modules
 /public/multichannel_*
 /media
 /shScripts/*
