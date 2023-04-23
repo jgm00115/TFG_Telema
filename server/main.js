@@ -9,9 +9,11 @@ app.use(cors());
 // rutas
 const ingestRoutes = require('./routes/ingestRoutes');
 const hrtfRoutes = require('./routes/hrtfRoutes');
+const streamRoutes = require('./routes/streamRoutes');
 
 app.use('/ingest',ingestRoutes);
 app.use('/hrtf',hrtfRoutes);
+app.use('/stream',streamRoutes);
 
 // directorio raíz
 rootDir = path.resolve(__dirname,'..');
