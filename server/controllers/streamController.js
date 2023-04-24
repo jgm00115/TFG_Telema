@@ -1,9 +1,21 @@
 const Stream = require('../models/stream');
 
+// Devuelve todos los streams
+exports.getStreams = (req,res) => {
+    Stream.find({})
+    .then((streams) => {
+        res.json(streams);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+    })
+}
+
 // Crea un nuevo stream y devuelve el id si hay éxito
 exports.postStream = (req,res) => {
     const stream = new Stream({
-        'name': req.body.name,
+        'title': req.body.title,
         'description': req.body.description,
         'instruments': req.body.instruments,
     });
