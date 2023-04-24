@@ -106,7 +106,7 @@ export default function Stream({ mediaURL }) {
 
         // INICIALIZA CADENA DE AUDIO
         audioChain.current = new AudioChain(audioRef.current,
-            numTracks.current, maxNumChannels, maxNumChannels);
+             maxNumChannels, defaultGain);
 
         console.log(`Nueva cadena de audio creada`);
 
