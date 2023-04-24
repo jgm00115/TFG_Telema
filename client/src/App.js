@@ -1,36 +1,33 @@
 import logo from './logo.svg';
-import Stream from './components/Stream.jsx'
+import Stream from './pages/Stream.jsx';
+import StreamList from './pages/StreamList.jsx';
 import './App.css';
 
-/*
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-*/
+import {useState} from 'react';
+import StreamingList from './pages/StreamList.jsx';
 
 function App() {
+
+  const [selectedStreaming, setSelectedStreaming] = useState(null);
+
+  console.log(`Selected Streaming = ${JSON.stringify(selectedStreaming)}`);
+
+  /* Si hay un streaming seleccionado renderiza la vista de streaming
+  * Si no, renderiza una vista con los streamings disponibles
+  */
   return (
-    <Stream
-      mediaURL={'/media/Unaligned/manifest.mpd'}
-    />
-  )
+    <>
+      {selectedStreaming ? (
+          <Stream
+            mediaURL={`media/${selectedStreaming._id}/manifest.mpd`}
+          />
+      ) : (
+        <StreamingList
+          setSelectedStreaming={setSelectedStreaming}
+        />
+      )}
+    </>
+  );
 }
 
 export default App;
