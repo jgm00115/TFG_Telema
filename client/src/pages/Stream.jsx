@@ -6,7 +6,7 @@ import { AudioChain } from '../components/AudioChain';
 
 import { useRef, useEffect, useState } from 'react'
 
-export default function Stream({ mediaURL }) {
+export default function Stream({ streamID, mediaURL }) {
 
     // Variables sin estado (su valor persiste entre re-renderizados)
     const numTracks = useRef(0);                            // número de tracks de audio total
@@ -73,7 +73,7 @@ export default function Stream({ mediaURL }) {
 
     }, [track]);
 
-    const onPlay = () => {
+    const onPlay = async () => {
 
         const defaultGain = 0.5;
 
@@ -97,24 +97,33 @@ export default function Stream({ mediaURL }) {
 
         // Actualiza el número de canales de audio disponibles
         numChannels.current = tracks.map(
-            (track) => track.audioChannelConfiguration);
+            (track) => parseInt(track.audioChannelConfiguration));
 
         const maxNumChannels = Math.max(...numChannels.current);
+        const mainTrackIndex = numChannels.current.indexOf(maxNumChannels);
 
         console.log(`Número de canales por track = ${numChannels.current}`);
         console.log(`Número de canales máximo = ${maxNumChannels}`);
+        console.log(`Índice del main = ${mainTrackIndex}`);
+
+        // Pide al backend las HRTFS
+        const response = await fetch(`/stream/${streamID}/hrtfs`);
+        const hrtfs = await response.json();
+
+        console.log(`Número de HRTFS recuperadas = ${hrtfs.length}`);
 
         // INICIALIZA CADENA DE AUDIO
         audioChain.current = new AudioChain(audioRef.current,
-             maxNumChannels, defaultGain);
+             maxNumChannels, defaultGain, hrtfs);
 
         console.log(`Nueva cadena de audio creada`);
 
         // Actualiza el valor de las ganancias
         setGains(audioChain.current.getFadersGain());
 
-        // Selecciona el track 0 por defecto
-        player.current.setCurrentTrack(tracks[0]);
+        // Selecciona el main por defecto
+        setTrack(mainTrackIndex);
+        player.current.setCurrentTrack(tracks[mainTrackIndex]);
 
     }
 

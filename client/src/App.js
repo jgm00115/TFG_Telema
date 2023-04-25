@@ -19,6 +19,7 @@ function App() {
     <>
       {selectedStreaming ? (
           <Stream
+            streamID={selectedStreaming._id}
             mediaURL={`media/${selectedStreaming._id}/manifest.mpd`}
           />
       ) : (
