@@ -40,6 +40,7 @@ exports.getStreamHRTFS = (req,res) => {
             res.sendStatus(404);
         }
         const hrtfs = await stream.getHRTFS();
+        console.log(`Se han recuperado ${hrtfs.length} hrtfs para el streaming ${streamID}`);
         res.status(200).json(hrtfs);
     })
     .catch((err) => {
