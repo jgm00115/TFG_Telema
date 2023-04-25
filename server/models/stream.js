@@ -11,7 +11,7 @@ const instrumentSchema = new Schema({
 });
 
 const streamSchema = new Schema({
-    title: {type: String, required:true},
+    name: {type: String, required:true},
     description: {type: String, requierd:false},
     instruments: [instrumentSchema]
 });
@@ -26,7 +26,25 @@ streamSchema.methods.getHRTFS = async function (){
             });
     }
     const hrtfs = await HRTFmodel.find({$or:positions}).exec();
-    return hrtfs;
+    // Puede haber multiples hrtfs con iguales coordenadas
+    // Asegura devolver una hrtf para cada instrumento
+    const instrumentHrtfs = this.instruments.map((instrument) => {
+        const matchingHrtf = hrtfs.find(hrtf => 
+            hrtf.azimuth === instrument.azimuth &&
+            hrtf.elevation === instrument.elevation
+            );
+        if (matchingHrtf) {
+            return {
+                ...matchingHrtf.toObject(),
+                channel: instrument.channel
+            };
+        } else {
+            return null;
+        }
+        
+    });
+
+    return instrumentHrtfs;
 };
 
 module.exports = mongoose.model('Stream',streamSchema);
