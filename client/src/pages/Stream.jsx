@@ -1,10 +1,12 @@
 import dashjs from 'dashjs'
 import Mixer from '../components/Mixer'
 import TrackSelector from '../components/TrackSelector';
+import RotationSelector from '../components/RotationSelector';
 
 import { AudioChain } from '../components/AudioChain';
 
 import { useRef, useEffect, useState } from 'react'
+import Fader from '../components/Fader';
 
 export default function Stream({ streamID, mediaURL }) {
 
@@ -12,6 +14,7 @@ export default function Stream({ streamID, mediaURL }) {
     const numTracks = useRef(0);                            // número de tracks de audio total
     const trackNames = useRef(Array(0));                    // nombre de los tracks de audio
     const numChannels = useRef(Array(0));                   // canales de audio por track (array)
+    const mainTrackIndex = useRef(null);
     const audioRef = useRef(null);                          // html audio media element 
     const player = useRef(dashjs.MediaPlayer().create());   // dash player
 
@@ -20,6 +23,8 @@ export default function Stream({ streamID, mediaURL }) {
     // Variables con estado (cada vez que cambien, los componentes se re-renderizan)
     const [track, setTrack] = useState(0);                  // track activo
     const [gains, setGains] = useState(Array(0).fill(0));   // array con ganancias de cada fader
+    const [masterGain, setMasterGain] = useState(1);
+    const [rotation, setRotation] = useState(0);            // grados de rotación respecto a la posición original
 
     // Se ejecuta una única vez tras el primer renderizado
     useEffect(() => {
@@ -55,7 +60,13 @@ export default function Stream({ streamID, mediaURL }) {
         }
 
     }, [gains]);
-
+    // Se ejecuta cuando la ganancia del master se actualiza
+    useEffect(()=>{
+        console.log(`Ganancia del master = ${masterGain}`);
+        if (audioChain.current != null) {
+            audioChain.current.setMasterGain(masterGain);
+        }
+    },[masterGain]);
     // Se ejecuta cuando el track seleccionado se actualice
     useEffect(() => {
 
@@ -70,8 +81,7 @@ export default function Stream({ streamID, mediaURL }) {
             player.current.setCurrentTrack(tracks[track]);
 
             // Si selecciona el main track usa convolvers
-            if (track == numChannels.current.indexOf(
-                Math.max(...numChannels.current))){
+            if (track == mainTrackIndex.current){
                     audioChain.current.bypassConvolvers(false);
             } else {
                 audioChain.current.bypassConvolvers(true);
@@ -108,11 +118,11 @@ export default function Stream({ streamID, mediaURL }) {
             (track) => parseInt(track.audioChannelConfiguration));
 
         const maxNumChannels = Math.max(...numChannels.current);
-        const mainTrackIndex = numChannels.current.indexOf(maxNumChannels);
+        mainTrackIndex.current = numChannels.current.indexOf(maxNumChannels);
 
         console.log(`Número de canales por track = ${numChannels.current}`);
         console.log(`Número de canales máximo = ${maxNumChannels}`);
-        console.log(`Índice del main = ${mainTrackIndex}`);
+        console.log(`Índice del main = ${mainTrackIndex.current}`);
 
         // Pide al backend las HRTFS
         const response = await fetch(`/stream/${streamID}/hrtfs`);
@@ -128,10 +138,10 @@ export default function Stream({ streamID, mediaURL }) {
 
         // Actualiza el valor de las ganancias
         setGains(audioChain.current.getFadersGain());
-
+        setMasterGain(audioChain.current.getMasterGain());
         // Selecciona el main por defecto
-        setTrack(mainTrackIndex);
-        player.current.setCurrentTrack(tracks[mainTrackIndex]);
+        setTrack(mainTrackIndex.current);
+        player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
 
     }
 
@@ -149,11 +159,27 @@ export default function Stream({ streamID, mediaURL }) {
                 setTrack={setTrack}
                 trackNames={trackNames.current}
             />
-
+            {track == mainTrackIndex.current ? (
+                <RotationSelector
+                rotation={rotation}
+                setRotation={setRotation}
+                min={-90}
+                max={90}
+                step={5}
+            />
+            ): null}
             <Mixer
                 gains={gains}
                 setGains={setGains}
                 numFaders={numChannels.current[track]}
+            />
+            <Fader
+                className='Master'
+                gain={masterGain}
+                setGain={(event)=>setMasterGain(event.target.value)}
+                min={0}
+                max={2}
+                step={0.1}
             />
         </div>
 
