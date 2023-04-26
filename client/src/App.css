@@ -41,3 +41,7 @@ input[type='range'] {
   -webkit-appearance: slider-vertical;
   width:40px;
 }
+
+.Master input[type="range"]{
+  background-color: lime !important;
+}
