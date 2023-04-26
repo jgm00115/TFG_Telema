@@ -26,6 +26,7 @@ export class AudioChain {
             this._mergerNode = this._audioCtx.createChannelMerger(1);
             // crea un nodo de ganancia maestro
             this._masterGain = this._audioCtx.createGain();
+            this._masterGain.gain.value = 1;
             // conecta la fuente al splitter
             this._sourceNode.connect(this._splitterNode);
             // crea nodos de ganancia y convolvers
@@ -52,7 +53,6 @@ export class AudioChain {
             // Conecta el mono merger al maestro
             this._mergerNode.connect(this._masterGain);
             // Conecta el maestro a la salida
-            this._masterGain.gain.value = 2;
             this._masterGain.connect(this._audioCtx.destination);
 
     }
@@ -77,6 +77,14 @@ export class AudioChain {
             gains.push(this._gainNodes[i].gain.value);
         }
         return gains;
+    }
+
+    setMasterGain(gain) {
+        this._masterGain.gain.value = gain;
+    }
+
+    getMasterGain() {
+        return this._masterGain.gain.value;
     }
 
     loadHRTFS(hrtfs) {
