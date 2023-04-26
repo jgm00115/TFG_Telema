@@ -69,6 +69,14 @@ export default function Stream({ streamID, mediaURL }) {
 
             player.current.setCurrentTrack(tracks[track]);
 
+            // Si selecciona el main track usa convolvers
+            if (track == numChannels.current.indexOf(
+                Math.max(...numChannels.current))){
+                    audioChain.current.bypassConvolvers(false);
+            } else {
+                audioChain.current.bypassConvolvers(true);
+            }
+
         }
 
     }, [track]);

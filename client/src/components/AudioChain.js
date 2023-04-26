@@ -6,8 +6,7 @@ export class AudioChain {
     _splitterNode = null;
     _gainNodes = [];
     _convolverNodes = [];
-    _monoMergerNode = null;
-    _stereoMergerNode = null;
+    _mergerNode = null;
     _masterGain = null;
 
     // Constructor
@@ -24,11 +23,9 @@ export class AudioChain {
             // crea un splitter
             this._splitterNode = this._audioCtx.createChannelSplitter(maxNumChannels);
             // crea un merger mono
-            this._monoMergerNode = this._audioCtx.createChannelMerger(1);
+            this._mergerNode = this._audioCtx.createChannelMerger(1);
             // crea un nodo de ganancia maestro
             this._masterGain = this._audioCtx.createGain();
-            // crea un merger stereo
-            this._stereoMergerNode = this._audioCtx.createChannelMerger(2);
             // conecta la fuente al splitter
             this._sourceNode.connect(this._splitterNode);
             // crea nodos de ganancia y convolvers
@@ -52,11 +49,12 @@ export class AudioChain {
 
             }
             console.log(this._convolverNodes[0]);
+            // Conecta el mono merger al maestro
+            this._mergerNode.connect(this._masterGain);
             // Conecta el maestro a la salida
             this._masterGain.gain.value = 2;
             this._masterGain.connect(this._audioCtx.destination);
-            // Conecta stereo merger a la salida
-            // this._stereoMergerNode.connect(this._audioCtx.destination);
+
     }
 
     /** 
@@ -97,5 +95,26 @@ export class AudioChain {
             }
             this._convolverNodes[i].buffer = buffer;
         }
+    }
+
+    bypassConvolvers(bypass){
+        if(bypass){
+            for(let i = 0; i < this._gainNodes.length; i++){
+                // Desconecta los nodos de ganancia de los convolvers
+                this._gainNodes[i].disconnect();
+                // Conecta al merger
+                this._gainNodes[i].connect(this._mergerNode);
+                console.log(this._masterGain);
+            }
+        } else {
+            for(let i = 0; i < this._gainNodes.length; i++){
+                // Desconecta los nodos de ganancia del merger
+                this._gainNodes[i].disconnect();
+                // Conecta con convolvers
+                this._gainNodes[i].connect(this._convolverNodes[i]);
+                console.log(this._masterGain);
+            }
+        }
+
     }
 }
