@@ -88,7 +88,7 @@ streamSchema.methods.rotate = async function(rotation){
         closestPositions.map((position)=> {
             return HRTFmodel.find({azimuth:position.azimuth,elevation:position.elevation});
         }));
-    return rotatedHrtfs;
+    return rotatedHrtfs.flat();
 }
 
 module.exports = mongoose.model('Stream',streamSchema);

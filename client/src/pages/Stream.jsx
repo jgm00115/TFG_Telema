@@ -90,6 +90,31 @@ export default function Stream({ streamID, mediaURL }) {
         }
 
     }, [track]);
+    
+    // Se ejecuta cuando la rotación se actualice
+    useEffect(() => {
+        async function loadHRTFS (){
+            console.log(`rotación = ${rotation}`);
+            if (audioChain.current != null){
+                let rotatedHRTFs;
+                if(rotation != 0){
+                    // Pide nuevas HRTFS
+                    const response = await fetch(`/stream/${streamID}/hrtfs/${rotation}`);
+                    rotatedHRTFs = await response.json();
+                } else {
+                    // Si la rotación es 0, pide las HRTF base
+                    const response = await fetch(`/stream/${streamID}/hrtfs/`);
+                    rotatedHRTFs = await response.json();
+                }
+                console.log('rotatedHRTFs:');
+                console.log(rotatedHRTFs);
+            
+            // Carga hrtfs en convolvers
+            audioChain.current.loadHRTFS(rotatedHRTFs);
+            }
+        }
+        loadHRTFS();
+    },[rotation]);
 
     const onPlay = async () => {
 
