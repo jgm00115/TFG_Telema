@@ -12,7 +12,7 @@ const instrumentSchema = new Schema({
 
 const streamSchema = new Schema({
     name: {type: String, required:true},
-    description: {type: String, requierd:false},
+    description: {type: String, required:false},
     instruments: [instrumentSchema]
 });
 
@@ -52,11 +52,43 @@ streamSchema.methods.getHRTFS = async function (){
     return instrumentHrtfs;
 };
 
-streamSchema.methods.rotate = async (rotation) => {
-    // Posiciones de todos los instrumentos del streaming
-    const positions = this.instruments.map((instrument) => {
-        return ({});
-    });
+// Para cada posicion selecciona la posicion más cercana
+closestAvailableAzimuths = async (positions) => {
+    closestPositions= [];
+    for (const position of positions){
+        azimuth = position.azimuth;
+        elevation = position.elevation;
+        // Azimuths disponibles para esa elevación
+        const availableAzimuths = await HRTFmodel.distinct(
+            'azimuth',{elevation: elevation});
+        // Distancia angular con los azimuths disponibles
+        const dist = availableAzimuths.map(
+            (availableAzimuth) => Math.abs(availableAzimuth - azimuth));
+        // Posición con mínima distancia
+        closestPositions.push({
+            azimuth: availableAzimuths[dist.indexOf(Math.min(...dist))],
+            elevation: elevation});
+    }
+    console.log(`Posiciones tras añadir rotación: ${JSON.stringify(positions)}`);
+    console.log(`Posiciones disponibles más cercanas:
+            ${JSON.stringify(closestPositions)}`);
+    return closestPositions;
+}
+
+streamSchema.methods.rotate = async function(rotation){
+    const positions = this.getPositions();
+    // Añade la rotación a cada posición
+    for (let position of positions){
+        position.azimuth += rotation;
+    }
+    // Encuentra las posiciones más cercanas disponibles
+    const closestPositions = await closestAvailableAzimuths(positions);
+    // Query de hrtfs con esas posiciones
+    const rotatedHrtfs = await Promise.all(
+        closestPositions.map((position)=> {
+            return HRTFmodel.find({azimuth:position.azimuth,elevation:position.elevation});
+        }));
+    return rotatedHrtfs;
 }
 
 module.exports = mongoose.model('Stream',streamSchema);
