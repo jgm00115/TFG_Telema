@@ -16,15 +16,20 @@ const streamSchema = new Schema({
     instruments: [instrumentSchema]
 });
 
+// Devuelve las posiciones de cada instrumento del streaming
+streamSchema.methods.getPositions = function(){
+    const positions = this.instruments.map((instrument) => {
+        return ({
+            'azimuth':instrument.azimuth,
+            'elevation': instrument.elevation
+        });
+    });
+    return positions;
+}
+
 // Devuelve las HRTF de la posicion de cada instrumento
 streamSchema.methods.getHRTFS = async function (){
-    const positions = [];
-    for (instrument of this.instruments){
-        positions.push({
-            'azimuth': instrument.azimuth,
-            'elevation': instrument.elevation
-            });
-    }
+    const positions = this.getPositions();
     const hrtfs = await HRTFmodel.find({$or:positions}).exec();
     // Puede haber multiples hrtfs con iguales coordenadas
     // Asegura devolver una hrtf para cada instrumento
@@ -46,5 +51,12 @@ streamSchema.methods.getHRTFS = async function (){
 
     return instrumentHrtfs;
 };
+
+streamSchema.methods.rotate = async (rotation) => {
+    // Posiciones de todos los instrumentos del streaming
+    const positions = this.instruments.map((instrument) => {
+        return ({});
+    });
+}
 
 module.exports = mongoose.model('Stream',streamSchema);
