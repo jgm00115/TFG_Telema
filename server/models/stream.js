@@ -79,7 +79,7 @@ streamSchema.methods.rotate = async function(rotation){
     const positions = this.getPositions();
     // Añade la rotación a cada posición
     for (let position of positions){
-        position.azimuth += rotation;
+        position.azimuth -= rotation;
     }
     // Encuentra las posiciones más cercanas disponibles
     const closestPositions = await closestAvailableAzimuths(positions);
