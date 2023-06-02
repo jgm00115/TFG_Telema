@@ -6,6 +6,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const chokidar = require('chokidar');
+
+const Stream = require('../models/stream');
 
 const media_dir = path.resolve(path.join(__dirname, '..', '..', 'media'));
 
@@ -50,6 +53,40 @@ exports.stream_ingest = (req, res) => {
         writeStream.end();
 
         console.log(`Fichero ${filename} recibido con éxito`);
+        
+        // Comprueba cambios para el fichero .mpd
+        if (path.extname(filename) === '.mpd'){
+            const watcher = chokidar.watch(filepath);
+            watcher.on('change', path => {
+                console.log(`Fichero ${path} ha cambiado`);
+                // Lee el fichero y obtiene el valor de type
+                fs.readFile(filepath, 'utf8', (err,data) => {
+                    if (err){
+                        console.log(`Error leyendo ${filepath}`);
+                        return;
+                    } else if (data == null){
+                        return;
+                    }
+                    const typeMatch = data.match(/type="([^"]+)"/);
+                    if(typeMatch && typeMatch[1]) {
+                        const typeValue = typeMatch[1]
+                        if (typeValue === 'dynamic')
+                            return;
+                        // actualiza la fecha en la que acaba el stream
+                        Stream.findByIdAndUpdate({_id: stream_key, endDate: null},{endDate: new Date()}, {new:true})
+                        .then(updateStream => {
+                            if (updateStream){
+                                console.log(`Live stream ${updateStream} ha acabado`);
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                        console.log(`TIPO = ${typeValue}`);
+                    }
+                });
+            })
+        }
 
         res.sendStatus(200);
 
