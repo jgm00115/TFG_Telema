@@ -8,7 +8,7 @@ def remap_coords (azimuth,elevation):
     eps = np.finfo(float).eps
 
     if (elevation > 90):
-        azimuth = np.sign(azimuth + eps)*(abs(azimuth)-180)
+        azimuth = np.sign(azimuth + eps)*180 - azimuth
         elevation = 180 - elevation
     
     return azimuth, elevation

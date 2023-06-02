@@ -20,26 +20,20 @@ $\phi \in [-180,180]$
 
 $\theta \in [-90, 90]$
 
-Cumpliéndose que:
+Considerando que:
 
 * (0,0) es un punto situado en frente
-* (0,-45) es un punto situado directamente abajo
+* (0,180) es un punto situado justamente a la espalda
 * (20,0) es un punto situado a la derecha
-* (-20,0) es un punto situado a la izquierda
+* (20,180) es un punto situado *a la derecha* y a la espalda (sí, americanos)
 
-Y además:
-
-* (0,230) = (180,-50)
-* (20,180) = (-160,0)
-* (-20,180) = (160,0)
-
-Esta transformación es, básicamente:
+El remapeo de coordenadas se hace con la siguiente transformación:
 
  $$ \forall \theta > 90º
 \rightarrow 
 \begin{cases}
   \begin{aligned}
-    \phi' = sign(\phi + \epsilon)(|\phi| - 180) \\
+    \phi' = sign(\phi + \epsilon)180 - \phi \\
     \theta' = 180 - \theta \\
   \end{aligned} \\
 \end{cases}$$
