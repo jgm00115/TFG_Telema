@@ -1,4 +1,5 @@
 import dashjs from 'dashjs'
+import Fader from '../components/Fader';
 import Mixer from '../components/Mixer'
 import TrackSelector from '../components/TrackSelector';
 import RotationSelector from '../components/RotationSelector';
@@ -6,9 +7,8 @@ import RotationSelector from '../components/RotationSelector';
 import { AudioChain } from '../components/AudioChain';
 
 import { useRef, useEffect, useState } from 'react'
-import Fader from '../components/Fader';
 
-export default function Stream({ streamID, mediaURL }) {
+export default function Stream({ streaming, mediaURL }) {
 
     // Variables sin estado (su valor persiste entre re-renderizados)
     const numTracks = useRef(0);                            // número de tracks de audio total
@@ -25,6 +25,7 @@ export default function Stream({ streamID, mediaURL }) {
     const [gains, setGains] = useState(Array(0).fill(0));   // array con ganancias de cada fader
     const [masterGain, setMasterGain] = useState(1);
     const [rotation, setRotation] = useState(0);            // grados de rotación respecto a la posición original
+    const [showlabels, setShowLabels] = useState(true);
 
     // Se ejecuta una única vez tras el primer renderizado
     useEffect(() => {
@@ -81,10 +82,13 @@ export default function Stream({ streamID, mediaURL }) {
             player.current.setCurrentTrack(tracks[track]);
 
             // Si selecciona el main track usa convolvers
+            // Y además añade nombre a los faders
             if (track == mainTrackIndex.current){
                     audioChain.current.bypassConvolvers(false);
+                    setShowLabels(true);
             } else {
                 audioChain.current.bypassConvolvers(true);
+                setShowLabels(false);
             }
 
         }
@@ -99,11 +103,11 @@ export default function Stream({ streamID, mediaURL }) {
                 let rotatedHRTFs;
                 if(rotation != 0){
                     // Pide nuevas HRTFS
-                    const response = await fetch(`/stream/${streamID}/hrtfs/${rotation}`);
+                    const response = await fetch(`/stream/${streaming._id}/hrtfs/${rotation}`);
                     rotatedHRTFs = await response.json();
                 } else {
                     // Si la rotación es 0, pide las HRTF base
-                    const response = await fetch(`/stream/${streamID}/hrtfs/`);
+                    const response = await fetch(`/stream/${streaming._id}/hrtfs/`);
                     rotatedHRTFs = await response.json();
                 }
                 console.log('rotatedHRTFs:');
@@ -150,7 +154,7 @@ export default function Stream({ streamID, mediaURL }) {
         console.log(`Índice del main = ${mainTrackIndex.current}`);
 
         // Pide al backend las HRTFS
-        const response = await fetch(`/stream/${streamID}/hrtfs`);
+        const response = await fetch(`/stream/${streaming._id}/hrtfs`);
         const hrtfs = await response.json();
 
         console.log(`Número de HRTFS recuperadas = ${hrtfs.length}`);
@@ -197,6 +201,8 @@ export default function Stream({ streamID, mediaURL }) {
                 gains={gains}
                 setGains={setGains}
                 numFaders={numChannels.current[track]}
+                faderlabels={streaming.instruments.map(instrument => instrument.name)}
+                showlabels={showlabels}
             />
             <Fader
                 className='Master'
@@ -205,6 +211,8 @@ export default function Stream({ streamID, mediaURL }) {
                 min={0}
                 max={2}
                 step={0.1}
+                faderlabel={'Master'}
+                showlabel={true}
             />
         </div>
 

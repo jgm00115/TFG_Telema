@@ -1,8 +1,10 @@
 import Fader from './Fader'
 
-export default function Mixer({ gains, setGains, numFaders }) {
+export default function Mixer({ gains, setGains, numFaders, faderlabels, showlabels }) {
 
     const faders = [];
+
+    console.log(`Nombre de los faders = ${faderlabels}`)
 
     /**
      * Actualiza el array de ganancias cuando el valor de algún 
@@ -35,12 +37,14 @@ export default function Mixer({ gains, setGains, numFaders }) {
                 min={0}
                 max={1}
                 step={0.1}
+                faderlabel={faderlabels[i]}
+                showlabel={showlabels}
             />
         )
     }
 
     return (
-        <div>
+        <div class='mixer'>
             {faders}
         </div>
 
