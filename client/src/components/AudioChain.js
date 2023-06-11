@@ -15,7 +15,7 @@ export class AudioChain {
             Maximo número de canales = ${maxNumChannels},
             Ganancia por defecto = ${defaultGain}`);
             // crea nuevo contexto de audio
-            this._audioCtx = new AudioContext();
+            this._audioCtx = new AudioContext({sampleRate:48000});
             // crea nodo fuente
             this._sourceNode = this._audioCtx.createMediaElementSource(audioRef);
             this._sourceNode.channelCount = maxNumChannels;
@@ -94,7 +94,7 @@ export class AudioChain {
             // longitud hrtf
             const length = hrtf.left.length;
             // respuesta al impulso stereo
-            const buffer = this._audioCtx.createBuffer(2,length,this._audioCtx.sampleRate);
+            const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
             const buffer_l = buffer.getChannelData(0);
             const buffer_r = buffer.getChannelData(1);
             for (let n = 0; n < length; n++){

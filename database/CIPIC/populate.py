@@ -58,6 +58,7 @@ def main(api_endpoint):
                 'elevation': float(el_remap),
                 'left': G[:,0].tolist(),
                 'right': G[:,1].tolist(),
+                'samplerate': sr
             }
             # Envia peticion POST
             requests.post(api_endpoint, json=hrtf)

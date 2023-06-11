@@ -7,6 +7,7 @@ const HRTFSchema = new Schema({
     elevation: {type: Number, required: true},
     left: {type: [Number], required: true},
     right: {type: [Number], required:true},
+    samplerate: {type: Number, required:true},
 });
 // Añade un índice compuesto por los campos azimuth y elevation
 HRTFSchema.index({azimuth: 1, elevation: 1 }, {unique: true});

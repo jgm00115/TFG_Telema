@@ -37,7 +37,8 @@ exports.postHRTF = (req, res) => {
         'azimuth': req.body.azimuth,
         'elevation': req.body.elevation,
         'left': req.body.left,
-        'right': req.body.right});
+        'right': req.body.right,
+        'samplerate': req.body.samplerate});
     hrtf.save()
     .then(()=> {
        console.log(`HRTF az = ${hrtf.azimuth}, el = ${hrtf.elevation} guardada en base de datos`);
