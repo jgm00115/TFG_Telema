@@ -45,3 +45,13 @@ input[type='range'] {
 .Master input[type="range"]{
   background-color: lime !important;
 }
+
+.mixer{
+  display:flex;
+  flex-direction: row;
+  gap:10px
+}
+
+.hidden_faderlabel{
+  display: none;
+}
