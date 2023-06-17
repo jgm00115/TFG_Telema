@@ -11,7 +11,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./media:/usr/src/media
+      - media:/usr/src/media
     environment:
       - MONGO_URL=mongodb://admin:admin@mongo:27017/App  #INIT_DB_USER Y PASSWORD
     depends_on:
@@ -39,3 +39,4 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
 volumes:
   mongoData:
+  media:
