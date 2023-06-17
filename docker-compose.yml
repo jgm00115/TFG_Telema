@@ -17,7 +17,7 @@ services:
     depends_on:
       - mongo
   mongo:
-    image: mongo
+    image: mongo:6.0.6
     restart: always
     volumes:
       - ./database/init/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
@@ -29,7 +29,7 @@ services:
       INIT_DB_USER: admin
       INIT_DB_PASSWORD: admin
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.0-alpha
     restart: always
     ports:
       - 8081:8081
