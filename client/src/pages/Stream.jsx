@@ -31,16 +31,13 @@ export default function Stream({ streaming, mediaURL }) {
     useEffect(() => {
 
         player.current.updateSettings({
-            streaming: {
-                cacheInitSegments: true,
-                buffer: {
-                    // bufferTimeAtTopQuality: 30,
-                    // bufferTimeAtTopQualityLongForm: 30,
-                    // stableBufferTime: 30,
-                    // longFormContentDurationThreshold: 30,
+            'streaming': {
+                'cacheInitSegments': true,
+                'delay': {
+                    liveDelayFragmentCount: 4
                 }
             }
-        })
+        });
 
         // Inicializa el reproductor dash y lo vincula al elemento de audio (autoplay true)
         player.current.initialize(audioRef.current, mediaURL, true);
@@ -130,6 +127,7 @@ export default function Stream({ streaming, mediaURL }) {
 
         // Actualiza el valor del número de tracks disponibles
         const tracks = player.current.getTracksFor('audio');
+        console.log(JSON.stringify(tracks));
         numTracks.current = tracks.length;
 
         // Actualiza el nombre de los tracks
