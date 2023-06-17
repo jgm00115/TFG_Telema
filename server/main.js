@@ -5,48 +5,26 @@ const connect = require('./utils/database');
 const app = express();
 
 app.use(cors());
+const port = 8080;
 
 // rutas
 const ingestRoutes = require('./routes/ingestRoutes');
 const hrtfRoutes = require('./routes/hrtfRoutes');
 const streamRoutes = require('./routes/streamRoutes');
+const mediaRoutes = require('./routes/mediaRoutes');
 
 app.use('/ingest',ingestRoutes);
 app.use('/hrtf',hrtfRoutes);
 app.use('/stream',streamRoutes);
-
+app.use('/media',mediaRoutes);
 // directorio raíz
 rootDir = path.resolve(__dirname,'..');
 
 // directorio con recursos estáticos
 app.use(express.static(path.join(rootDir,'public')));
 
-const port = 8080;
-
 app.get('/', (req,res) => {
     res.sendFile(path.join(rootDir,'public/home.html'));
-})
-
-// Peticiones de playlist
-app.get('/media/:media/:filename/', (req,res) => {
-
-    res_path = path.join(rootDir,'media', req.params.media, req.params.filename);
-
-    console.log(`>Petición de playlist ${res_path}`);
-
-    res.sendFile(res_path);
-
-})
-
-// Peticiones de segmentos
-app.get('/media/:media/:stream/:segment', (req,res) => {
-
-    res_path = path.join(rootDir,'media', req.params.media, req.params.stream, req.params.segment);
-
-    console.log(`>Petición de segmento ${res_path}`);
-    
-    res.sendFile(res_path);
-
 })
 
 async function startServer() {
