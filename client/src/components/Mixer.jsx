@@ -4,8 +4,6 @@ export default function Mixer({ gains, setGains, numFaders, faderlabels, showlab
 
     const faders = [];
 
-    console.log(`Nombre de los faders = ${faderlabels}`)
-
     /**
      * Actualiza el array de ganancias cuando el valor de algún 
      * fader cambia
