@@ -1,8 +1,13 @@
 # TFG Telema
 Servicio de streaming de audio de carácter inmersivo para retransmitir actuaciones de música clásica
 
+## Ejemplo de funcionamiento
+En la dirección http://185.253.152.19:3000 está disponible una presentación bajo demanda a modo de demostración de funcionamiento del servicio.
+
+Se recomienda hacer uso de navegadores web basados en chromium, como podrían ser google chrome o microsoft edge.
+
 ## Distribución de contenido
-Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de [dash.js](https://github.com/Dash-Industry-Forum/dash.js/)para la reproducción del contenido.
+Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de [dash.js](https://github.com/Dash-Industry-Forum/dash.js/) para la reproducción del contenido.
 
 ## Ingesta de media
 Se emplea `ffmpeg` para la transcodificación y empaquetado de audio. Para subir contenido al servidor se usa el endpoint`http://localhost:8080/ingest/:stream_key/:filename`.
