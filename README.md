@@ -1,8 +1,8 @@
 # TFG Telema
 Servicio de streaming de audio de carácter inmersivo para retransmitir actuaciones de música clásica
 
-## Ejemplo de funcionamiento
-En la dirección http://185.253.152.19:3000 está disponible una presentación bajo demanda a modo de demostración de funcionamiento del servicio.
+## Ejemplo de funcionamiento para las separaciones del TFG de teleco
+[En el siguiente enlace](https://thankful-similarly-trout.ngrok-free.app/) se puede acceder a distintos **ejemplos de separación obtenidos con el sistema propuesto en el TFG de teleco**. La aplicación ha sido ligeramente modificada, inhibiendo la espacialización de las mezclas y sirviendo en distintos adaptation sets las señales de cada método de separación propuesto.
 
 Se recomienda hacer uso de navegadores web basados en chromium, como podrían ser google chrome o microsoft edge.
 
