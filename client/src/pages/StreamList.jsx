@@ -11,7 +11,7 @@ export default function StreamingList({setSelectedStreaming}){
         setSelectedStreaming(selectedStreaming);
     }
 
-    // Recupera la info de todos los streamings
+    // Retrieve the info of all streamings
     useEffect(()=> {
         fetch('/stream/')
         .then((response) => response.json())

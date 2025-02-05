@@ -1,19 +1,19 @@
 # TFG Telema
-Servicio de streaming de audio de carácter inmersivo para retransmitir actuaciones de música clásica. Es posible acceder a la memoria del trabajo mediante el
-[siguiente enlace](https://hdl.handle.net/10953.1/20073).
+Immersive audio streaming service for broadcasting classical music performances. You can access the project report through the
+[following link](https://hdl.handle.net/10953.1/20073).
 
-## Ejemplo de funcionamiento para las separaciones del TFG de teleco
-[En el siguiente enlace](https://thankful-similarly-trout.ngrok-free.app/) se puede acceder a distintos **ejemplos de separación obtenidos con el sistema propuesto en el TFG de teleco**. La aplicación ha sido ligeramente modificada, inhibiendo la espacialización de las mezclas y sirviendo en distintos adaptation sets las señales de cada método de separación propuesto.
+## Example of operation for the separations of the teleco TFG
+[In the following link](https://thankful-similarly-trout.ngrok-free.app/) you can access different **separation examples obtained with the system proposed in the teleco TFG**. The application has been slightly modified, inhibiting the spatialization of the mixes and serving the signals of each proposed separation method in different adaptation sets.
 
-Se recomienda hacer uso de navegadores web basados en chromium, como podrían ser google chrome o microsoft edge.
+It is recommended to use chromium-based web browsers, such as Google Chrome or Microsoft Edge.
 
-## Distribución de contenido
-Todo el audio se distribuye empleando el protocolo `MPEG-DASH`. En el frontend se hace uso de [dash.js](https://github.com/Dash-Industry-Forum/dash.js/) para la reproducción del contenido.
+## Content distribution
+All audio is distributed using the `MPEG-DASH` protocol. The frontend uses [dash.js](https://github.com/Dash-Industry-Forum/dash.js/) for content playback.
 
-## Ingesta de media
-Se emplea `ffmpeg` para la transcodificación y empaquetado de audio. Para subir contenido al servidor se usa el endpoint`http://localhost:8080/ingest/:stream_key/:filename`.
+## Media ingestion
+`ffmpeg` is used for audio transcoding and packaging. To upload content to the server, the endpoint `http://localhost:8080/ingest/:stream_key/:filename` is used.
 
-Por ejemplo, el siguiente comando envia un pseudostream con 4 fuentes de audio:
+For example, the following command sends a pseudostream with 4 audio sources:
 
 ```bash
 ffmpeg -re \
@@ -29,6 +29,6 @@ ffmpeg -re \
 -adaptation_sets "id=0,streams=0 id=1,streams=1 id=2,streams=2 id=3,streams=3 " \
 http://localhost:8080/ingest/test/manifest.mpd
 ```
-En la transcodificación y empaquetado se emplea el codec `Opus` y contenedores `WebM`. Las etiquetas de `language` en los metadatos de cada stream sirven para identificar al instrumento correspondiente.
+The `Opus` codec and `WebM` containers are used for transcoding and packaging. The `language` tags in the metadata of each stream are used to identify the corresponding instrument.
 
-Cada señal de audio se corresponde con un track del stream especificándolo en los `adaptation_sets`. Durante la reproducción se puede seleccionar interactivamente uno de estos tracks, el servidor envía al cliente únicamente el audio perteneciente al track seleccionado.**Todos los tracks pertenecientes al stream están sincronizados**.
+Each audio signal corresponds to a track of the stream specifying it in the `adaptation_sets`. During playback, one of these tracks can be interactively selected, and the server sends the client only the audio belonging to the selected track. **All tracks belonging to the stream are synchronized**.

@@ -1,5 +1,5 @@
 /**
- * Módulo para conectar con base de datos
+ * Module for connecting to the database
  */
 
 const mongoose = require('mongoose');

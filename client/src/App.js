@@ -12,8 +12,8 @@ function App() {
 
   console.log(`Selected Streaming = ${JSON.stringify(selectedStreaming)}`);
 
-  /* Si hay un streaming seleccionado renderiza la vista de streaming
-  * Si no, renderiza una vista con los streamings disponibles
+  /* If there is a selected streaming, render the streaming view
+  * If not, render a view with the available streamings
   */
   return (
     <>

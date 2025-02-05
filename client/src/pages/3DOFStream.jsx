@@ -9,9 +9,9 @@ import { AudioChain } from '../components/AudioChain';
 import { useRef, useEffect, useState } from 'react'
 
 export default function Stream({ streaming, mediaURL }) {
-    console.log(mediaURL)
+
     // Stateless variables (their value persists between re-renders)
-    const numTracks = useRef(0);                            // total number of audio tracks
+    const numTracks = useRef(0);                            // total number of audio tracks 
     const trackNames = useRef(Array(0));                    // names of the audio tracks
     const numChannels = useRef(Array(0));                   // audio channels per track (array)
     const mainTrackIndex = useRef(null);
@@ -25,7 +25,7 @@ export default function Stream({ streaming, mediaURL }) {
     const [gains, setGains] = useState(Array(0).fill(0));   // array with gains of each fader
     const [masterGain, setMasterGain] = useState(1);
     const [rotation, setRotation] = useState(0);            // degrees of rotation from the original position
-    const [showlabels, setShowLabels] = useState(true);
+    const [showlabels, setShowLabels] = useState(true); 
 
     // Executes once after the first render
     useEffect(() => {
