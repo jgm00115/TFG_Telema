@@ -1,13 +1,65 @@
+export class AudioProcessor {
+
+    // attributes
+    _audioCtx = null;
+    _masterGain = null;
+
+    /**
+     * Creates an instance of AudioProcessor.
+     * 
+     * @param {HTMLMediaElement} audioRef - The reference to the audio element.
+     * @param {number} maxNumChannels - The maximum number of audio channels.
+     * @param {number} defaultGain - The default gain value.
+     * @param {Array} hrtfs - The HRTF data.
+     */
+    constructor(audioRef, maxNumChannels, defaultGain, hrtfs) {
+        console.log(`Creating new audio component`);
+        // new audio context
+        this._audioCtx = new AudioContext({sampleRate:48000});
+        this._masterGain = this._audioCtx.createGain();
+        this._masterGain.gain.value = 1;
+    }
+
+    /** 
+     * Updates the gain values of the faders.
+     * 
+     * @param {number[]} gains - Array with new gain values.
+     */
+    setFadersGain(gains) {
+        for (let i = 0; i < this._gainNodes.length; i++) {
+            this._gainNodes[i].gain.value = gains[i];
+        }
+    }
+
+    /**
+     * Sets the master gain value.
+     * 
+     * @param {number} gain - The gain value to set. Should be a number between 0 and 1.
+     */
+    setMasterGain(gain) {
+        this._masterGain.gain.value = gain;
+    }
+
+    /**
+     * Gets the current master gain value.
+     * 
+     * @returns {number} The current gain value.
+     */
+    getMasterGain() {
+        return this._masterGain.gain.value;
+    }
+
+}
+
+
 export class AudioChain {
 
-    // Atributos
-    _audioCtx = null;
+    // Attributes
     _sourceNode = null;
     _splitterNode = null;
     _gainNodes = [];
     _convolverNodes = [];
     _mergerNode = null;
-    _masterGain = null;
 
     // Constructor
     constructor(audioRef, maxNumChannels, defaultGain, hrtfs) {
@@ -91,7 +143,7 @@ export class AudioChain {
         // Introduce la respuesta al impulso para cada convolver
         for (let i = 0; i < this._convolverNodes.length; i++){
             const hrtf = hrtfs[i];
-            // longitude hrtf
+            // longitud hrtf
             const length = hrtf.left.length;
             // respuesta al impulso stereo
             const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
@@ -127,3 +179,93 @@ export class AudioChain {
     }
 }
 
+
+export class ambiConvolver {
+
+    constructor(audioCtx, order) {
+
+        this.initialized = false;
+
+        this.ctx = audioCtx;
+        this.order = order;
+        this.nCh = (order + 1) * (order + 1);
+        this.encFilters = new Array(this.nCh);
+        this.encFilterNodes = new Array(this.nCh);
+        // input and output nodes
+        this.in = this.ctx.createGain();
+        this.in.channelCountMode = 'explicit';
+        this.in.channelCount = 1;
+        this.out = this.ctx.createChannelMerger(this.nCh);
+        // convolver nodes
+        for (var i = 0; i < this.nCh; i++) {
+            this.encFilterNodes[i] = this.ctx.createConvolver();
+            this.encFilterNodes[i].normalize = false;
+        }
+        // create audio connections
+        for (var i = 0; i < this.nCh; i++) {
+            this.in.connect(this.encFilterNodes[i]);
+            this.encFilterNodes[i].connect(this.out, 0, i);
+        }
+
+        this.initialized = true;
+    }
+
+    updateFilters(audioBuffer) {
+        // assign filters to convolvers
+        for (var i = 0; i < this.nCh; i++) {
+            this.encFilters[i] = this.ctx.createBuffer(1, audioBuffer.length, audioBuffer.sampleRate);
+            this.encFilters[i].getChannelData(0).set(audioBuffer.getChannelData(i));
+
+            this.encFilterNodes[i].buffer = this.encFilters[i];
+        }
+    }
+
+
+}
+
+export class ambiBinConvolver extends AudioNode{
+    constructor(audioCtx, order) {
+
+        this.initialized = false;
+
+        this.ctx = audioCtx;
+        this.order = order;
+        this.nCh = (order + 1) * (order + 1);
+        this.hrtfFilters = new Array(this.nCh);
+        this.hrtfFilterNodes = new Array(this.nCh);
+        // input 
+        this.in = this.ctx.createChannelSplitter(this.nCh);
+        this.in.channelCountMode = 'explicit';
+        this.in.channelInterpretation = 'discrete'; // Use discrete channel interpretation
+        this.out = this.ctx.createChannelMerger(2);
+        this.out.channelCountMode = 'explicit';
+        this.out.channelInterpretation = 'discrete'; // Use discrete channel interpretation
+        // convolver nodes
+
+        for (var i = 0; i < this.nCh; i++) {
+            this.hrtfFilterNodes[i] = this.ctx.createConvolver();
+            this.hrtfFilterNodes[i].normalize = false;
+            this.hrtfFilterNodes[i].channelCount = 2;
+            this.hrtfFilterNodes[i].channelInterpretation = 'discrete';
+            this.hrtfFilterNodes[i].channelCountMode = 'explicit';
+        }
+        // create audio connections
+        for (var i = 0; i < this.nCh; i++) {
+            this.in.connect(this.hrtfFilterNodes[i],i);
+            this.hrtfFilterNodes[i].connect(this.out, 0, 0);
+        }
+
+        this.initialized = true;
+    }
+
+    updateHrtfs(audioBuffer) {
+        // assign filters to convolvers
+        for (var i = 0; i < this.nCh; i++) {
+            this.hrtfFilters[i] = this.ctx.createBuffer(2, audioBuffer.length, audioBuffer.sampleRate);
+            this.hrtfFilters[i].getChannelData(0).set(audioBuffer.getChannelData(0));
+            this.hrtfFilters[i].getChannelData(1).set(audioBuffer.getChannelData(1));
+
+            this.hrtfFilterNodes[i].buffer = this.hrtfFilters[i];
+        }
+    }
+}
