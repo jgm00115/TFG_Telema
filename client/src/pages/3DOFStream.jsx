@@ -112,7 +112,7 @@ export default function Stream({ streaming, mediaURL }) {
                 console.log(rotatedHRTFs);
             
             // Load hrtfs into convolvers
-            audioChain.current.loadHRTFS(rotatedHRTFs);
+           AudioIO.current.getSelectedAudioChain().loadHRTFS(rotatedHRTFs);
             }
         }
         loadHRTFS();

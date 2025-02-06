@@ -1,7 +1,7 @@
 /** 
 * streamController.js
 * 
-* Callbacks para procesar peticiones relacionadas con streams
+* Callbacks to process requests related to streams
 */
 
 const fs = require('fs');
@@ -14,7 +14,7 @@ const media_dir = path.resolve(path.join(__dirname, '..', '..', 'media'));
 
 exports.get_ingest = (req, res) => {
 
-    res.send(`No implementado: media_dir = ${media_dir}`);
+    res.send(`Not implemented: media_dir = ${media_dir}`);
 
 }
 
@@ -22,14 +22,14 @@ exports.stream_ingest = (req, res) => {
 
     const stream_key = req.params.stream_key;
 
-    // Crea directorio de salida si no existe
-    // (debería relacionarse con el stream key)
+    // Create output directory if it does not exist
+    // (should be related to the stream key)
     const ingest_path = path.join(media_dir,stream_key);
 
     try{
         if(!fs.existsSync(ingest_path)) {
             fs.mkdirSync(ingest_path, {recursive: true});
-            console.log(`Directorio ${ingest_path} creado`);
+            console.log(`Directory ${ingest_path} created`);
         }
     } catch (error) {
         console.log(error);
@@ -40,29 +40,29 @@ exports.stream_ingest = (req, res) => {
 
     const writeStream = fs.createWriteStream(filepath);
 
-    // Escribe en directorio de salida cuando recibe data
+    // Write to output directory when data is received
     req.on('data', (chunk) => {
 
         writeStream.write(chunk);
 
     });
 
-    // Envia OK si todo ha ido correctamente
+    // Send OK if everything went correctly
     req.on('end', () => {
 
         writeStream.end();
 
-        console.log(`Fichero ${filename} recibido con éxito`);
+        console.log(`File ${filename} received successfully`);
         
-        // Comprueba cambios para el fichero .mpd
+        // Check for changes to the .mpd file
         if (path.extname(filename) === '.mpd'){
             const watcher = chokidar.watch(filepath);
             watcher.on('change', path => {
-                console.log(`Fichero ${path} ha cambiado`);
-                // Lee el fichero y obtiene el valor de type
+                console.log(`File ${path} has changed`);
+                // Read the file and get the value of type
                 fs.readFile(filepath, 'utf8', (err,data) => {
                     if (err){
-                        console.log(`Error leyendo ${filepath}`);
+                        console.log(`Error reading ${filepath}`);
                         return;
                     } else if (data == null){
                         return;
@@ -72,17 +72,17 @@ exports.stream_ingest = (req, res) => {
                         const typeValue = typeMatch[1]
                         if (typeValue === 'dynamic')
                             return;
-                        // actualiza la fecha en la que acaba el stream
+                        // update the end date of the stream
                         Stream.findByIdAndUpdate({_id: stream_key, endDate: null},{endDate: new Date()}, {new:true})
                         .then(updateStream => {
                             if (updateStream){
-                                console.log(`Live stream ${updateStream} ha acabado`);
+                                console.log(`Live stream ${updateStream} has ended`);
                             }
                         })
                         .catch(error => {
                             console.log(error);
                         });
-                        console.log(`TIPO = ${typeValue}`);
+                        console.log(`TYPE = ${typeValue}`);
                     }
                 });
             })
@@ -94,8 +94,8 @@ exports.stream_ingest = (req, res) => {
 
     writeStream.on('error', (err) => {
 
-        console.log(`Error durante ingesta de datos: ${err}`);
-        res.status(500).send(`Error al procesar archivos recibidos`);
+        console.log(`Error during data ingestion: ${err}`);
+        res.status(500).send(`Error processing received files`);
 
     });
 

@@ -27,9 +27,10 @@ def setStreamData():
         instrument['azimuth'] = az
         instrument['elevation'] = el
     data = {
-        'title': f'testing-{datetime.date.today()}',
+        'title': f'testing-{datetime.date.today()} POL ambi2',
         'description': 'functionality test',
-        'instruments': instruments
+        'instruments': instruments,
+        'sh_order': 2
     }
     return data
 
@@ -97,14 +98,18 @@ if __name__ == '__main__':
             "audio/Unaligned/VC.wav",
             "audio/Unaligned/FL.wav",
             "audio/Unaligned/VN_I.wav",
-            "audio/Unaligned/MAIN.wav",
-    ]
+            "audio/3DOF/POS1.wav",
+            "audio/Unaligned/MAIN.wav"
+            
+]
 
     group_names = [
             'cellos',
             'flutes',
             'violins',
+            'ambi',
             'main'
+           
     ]
 
     server_addr = 'localhost:8080'

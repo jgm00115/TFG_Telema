@@ -4,12 +4,16 @@ import Mixer from '../components/Mixer'
 import TrackSelector from '../components/TrackSelector';
 import RotationSelector from '../components/RotationSelector';
 
-import { AudioChain } from '../components/AudioChain';
+//import { AudioChain } from '../components/AudioChain';
 
 import { useRef, useEffect, useState } from 'react'
+import { SSSAudioChain } from '../components/SSSAudioChain';
+import { AudioIO } from '../components/AudioIO';
+import { MOAudioChain } from '../components/MOAudioChain';
+import { AmbiAudioChain } from '../components/AmbiAudioChain';
 
 export default function Stream({ streaming, mediaURL }) {
-    console.log(mediaURL)
+    console.log('Stream');
     // Stateless variables (their value persists between re-renders)
     const numTracks = useRef(0);                            // total number of audio tracks
     const trackNames = useRef(Array(0));                    // names of the audio tracks
@@ -18,7 +22,7 @@ export default function Stream({ streaming, mediaURL }) {
     const audioRef = useRef(null);                          // HTML audio media element 
     const player = useRef(dashjs.MediaPlayer().create());   // dash player
 
-    const audioChain = useRef(null);
+    const audioIO = useRef(null);
 
     // State variables (components re-render every time they change)
     const [track, setTrack] = useState(0);                  // active track
@@ -26,10 +30,10 @@ export default function Stream({ streaming, mediaURL }) {
     const [masterGain, setMasterGain] = useState(1);
     const [rotation, setRotation] = useState(0);            // degrees of rotation from the original position
     const [showlabels, setShowLabels] = useState(true);
-
+    console.log('UI components');
     // Executes once after the first render
     useEffect(() => {
-
+        console.log('updateSettings');
         player.current.updateSettings({
             'streaming': {
                 'cacheInitSegments': true,
@@ -47,45 +51,51 @@ export default function Stream({ streaming, mediaURL }) {
         // Executes when gains are updated
         useEffect(() => {
 
-        console.log(`Gains = ${gains}`);
+        
 
         // IF THE AUDIO CHAIN IS INITIALIZED
-        if (audioChain.current != null) {
-
+        if (audioIO.current != null) {
+            console.log(`Gains = ${gains}`);
             // Update gain nodes
-            audioChain.current.setFadersGain(gains);
+            //audioChain.current.setFadersGain(gains);
+            audioIO.current.getSelectedAudioChain().setFadersGain(gains);
 
         }
 
         }, [gains]);
         // Executes when the master gain is updated
         useEffect(()=>{
-        console.log(`Master gain = ${masterGain}`);
-        if (audioChain.current != null) {
-            audioChain.current.setMasterGain(masterGain);
+        
+        if (audioIO.current  != null) {
+            console.log(`Master gain = ${masterGain}`);
+            audioIO.current.setMasterGain(masterGain);
         }
         },[masterGain]);
         // Executes when the selected track is updated
         useEffect(() => {
 
-        console.log(`Active track = ${track}`);
-
-        if (audioChain.current != null) {
-
+        if (audioIO.current != null) {
+            console.log(`Active track = ${track}`);
             // Update active track
-
+            console.log(`Uploading new track `);
             const tracks = player.current.getTracksFor('audio');
 
             player.current.setCurrentTrack(tracks[track]);
 
             // If the main track is selected, use convolvers
             // And also add names to the faders
-            if (track == mainTrackIndex.current){
-                audioChain.current.bypassConvolvers(false);
+            console.log(`track = ${track}`);
+            console.log(`track names = ${trackNames.current}`);
+            if (trackNames[track] == 'main'){
+                audioIO.current.switchAudioChain(0);
                 setShowLabels(true);
-            } else {
-            audioChain.current.bypassConvolvers(true);
-            setShowLabels(false);
+            } else if (trackNames[track] == 'ambi'){
+                audioIO.current.switchAudioChain(2);
+                setShowLabels(false);
+            }
+            else {
+                audioIO.current.switchAudioChain(1);
+                setShowLabels(false);
             }
 
         }
@@ -96,8 +106,9 @@ export default function Stream({ streaming, mediaURL }) {
     // Executes when the rotation is updated 
     useEffect(() => {
         async function loadHRTFS (){
-            console.log(`rotation = ${rotation}`);
-            if (audioChain.current != null){
+            
+            if (audioIO.current != null) {
+                console.log(`rotation = ${rotation}`);
                 let rotatedHRTFs;
                 if(rotation != 0){
                     // Request new HRTFS
@@ -112,18 +123,18 @@ export default function Stream({ streaming, mediaURL }) {
                 console.log(rotatedHRTFs);
             
             // Load hrtfs into convolvers
-            audioChain.current.loadHRTFS(rotatedHRTFs);
+            audioIO.current.getAudioChain(0).loadHRTFS(rotatedHRTFs);
             }
         }
         loadHRTFS();
     },[rotation]);
 
     const onPlay = async () => {
-
+        console.log('onPlay');
         const defaultGain = 0.5;
 
         // IF AUDIO CHAIN IS INITIALIZED, RETURN
-        if (audioChain.current != null)
+        if (audioIO.current != null)
             return;
 
         // Update the value of the number of available tracks
@@ -140,7 +151,7 @@ export default function Stream({ streaming, mediaURL }) {
         trackNames.current = trackLangs;
 
         console.log(`Number of audio tracks = ${numTracks.current}`);
-
+        console.log(`track names = ${trackNames.current}`);
         // Update the number of available audio channels
         numChannels.current = tracks.map(
             (track) => parseInt(track.audioChannelConfiguration));
@@ -153,24 +164,40 @@ export default function Stream({ streaming, mediaURL }) {
         console.log(`Main track index = ${mainTrackIndex.current}`);
 
         // Request HRTFS from the backend
+        console.log("requesting hrtfs");
         const response = await fetch(`/stream/${streaming._id}/hrtfs`);
         const hrtfs = await response.json();
-
         console.log(`Number of HRTFS retrieved = ${hrtfs.length}`);
+        console.log(hrtfs);
+        const ambiResponse = await fetch(`/stream/${streaming._id}/ambiHrtfs`);
+        const ambiHrtfs = await ambiResponse.json();
+        console.log(`Number of ambi HRTFS retrieved = ${ambiHrtfs.length}`);
+        console.log(ambiHrtfs);
+
+        // Create a new audioIO and multiple audio chains
+        audioIO.current = new AudioIO(audioRef.current,maxNumChannels);
+        audioIO.current.addAudioChain(new SSSAudioChain(audioIO.current.getAudioCtx(), maxNumChannels, defaultGain, hrtfs));
+        audioIO.current.addAudioChain(new MOAudioChain(audioIO.current.getAudioCtx(), 2, defaultGain));
+        audioIO.current.addAudioChain(new AmbiAudioChain(audioIO.current.getAudioCtx(), 2, defaultGain,ambiHrtfs));
+       
 
         // INITIALIZE AUDIO CHAIN
-        audioChain.current = new AudioChain(audioRef.current,
-             maxNumChannels, defaultGain, hrtfs);
+        if(trackNames.current[mainTrackIndex.current]  == 'main') {
+            audioIO.current.switchAudioChain(0);
+            //audioChain.current = new AudioChain(audioRef.current,
+            //     maxNumChannels, defaultGain, hrtfs);
 
-        console.log(`New audio chain created`);
+            console.log(`New audio chain selected`);
 
-        // Update the value of the gains
-        setGains(audioChain.current.getFadersGain());
-        setMasterGain(audioChain.current.getMasterGain());
-        // Select the main track by default
-        setTrack(mainTrackIndex.current);
-        player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-
+            // Update the value of the gains
+            setGains(audioIO.current.getSelectedAudioChain().getFadersGain());
+            setMasterGain(audioIO.current.getMasterGainValue());
+            // Select the main track by default
+            setTrack(mainTrackIndex.current);
+            player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
+        } else {
+            console.log("ciao")
+        }
     }
 
     return (
