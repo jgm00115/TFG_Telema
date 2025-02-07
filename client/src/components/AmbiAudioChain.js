@@ -6,7 +6,6 @@ export class AmbiAudioChain {
     _splitterNode = null;
    
     _convolverNodes = [];
-    _mergerNode = null;
     _masterGain = null;
 
     // Constructor
@@ -14,31 +13,28 @@ export class AmbiAudioChain {
     constructor(audioCtx, order, defaultGain, hrtfs) {
         this._maxNumChannels = (order + 1) * (order + 1);
         console.log(`Creating new audio chain:  
-        3DOF single position rendering`);
+        3DOF single position rendering of order ${order} with ${this._maxNumChannels} channels`);
         // creating new audio context
         this._audioCtx = audioCtx
         // create a splitter
         this._splitterNode = this._audioCtx.createChannelSplitter(this._maxNumChannels);
         this._splitterNode.channelCountMode = 'explicit';
         this._splitterNode.channelInterpretation = 'discrete'; // Use discrete channel interpretation
-      
-        // create a stereo merger for binaural output
-        this._mergerNode = this._audioCtx.createChannelMerger(2);
-        this._mergerNode.channelCountMode = 'explicit';
-        this._mergerNode.channelInterpretation = 'discrete'; // Use discrete channel interpretation
-
+        console.log(this._splitterNode);
         // create a master gain node
         this._masterGain = this._audioCtx.createGain();
         this._masterGain.gain.value = 1;
+        this._masterGain.channelCount = 2;
+        console.log(this._masterGain);
 
         // create convolvers nodes for ambi hrtf
         for (let i = 0; i < this._maxNumChannels; i++){
             this._convolverNodes.push(this._audioCtx.createConvolver());
             
             // disable normalization in convolvers
-            this._convolverNodes[i].normalize = false;
+            this._convolverNodes[i].normalize = false
             this._convolverNodes[i].channelCount = 2;
-            this._convolverNodes[i].channelInterpretation = 'discrete';
+            //this._convolverNodes[i].channelInterpretation = 'discrete';
             this._convolverNodes[i].channelCountMode = 'explicit';
             // Connect the splitter to the gain nodes
             this._splitterNode.connect(this._convolverNodes[i], i);
@@ -52,10 +48,6 @@ export class AmbiAudioChain {
             this._convolverNodes[i].connect(this._masterGain);
         }
         console.log(this._convolverNodes[0]);
-        // Connect the mono merger to the master
-        this._mergerNode.connect(this._masterGain);
-        // Connect the master to the output
-        this._masterGain.connect(this._audioCtx.destination);
     }
 
     /**
@@ -64,6 +56,8 @@ export class AmbiAudioChain {
      * @param {Array} hrtfs - The HRTF data.
      */
     loadHRTFS(hrtfs) {
+        console.log(`Loading ${hrtfs.length} HRTFs`);
+        console.log(hrtfs);
         for (let i = 0; i < this._convolverNodes.length; i++){
             const hrtf = hrtfs[i];
             // HRTF length
@@ -105,6 +99,12 @@ export class AmbiAudioChain {
     getOutputNode() {
         return this._masterGain;
     }
-
+    getFadersGain() {
+        return this._convolverNodes.map(ConvolverNode => this._masterGain.gain.value);
+    }
+    setFadersGain(gains) {
+        
+            this._masterGain.gain.value = gains[0];
+    }
 }
 

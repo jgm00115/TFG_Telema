@@ -11,7 +11,7 @@ export class AudioIO {
         
         this._masterGain = this._audioCtx.createGain();
         this._masterGain.gain.value = DEFAULT_GAIN;
-        this._sourceNode.connect(this._masterGain);
+        //this._sourceNode.connect(this._masterGain);
         this._masterGain.connect(this._audioCtx.destination);
         this._audioChains = [];
         this._selectedAudioChainIndex = 0;

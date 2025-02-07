@@ -4,14 +4,6 @@ import numpy as np
 from scipy.io import loadmat
 from scipy.signal import resample_poly
 
-def remap_coords (azimuth,elevation):
-    eps = np.finfo(float).eps
-
-    if (elevation > 90):
-        azimuth = np.sign(azimuth + eps)*180 - azimuth
-        elevation = 180 - elevation
-    
-    return azimuth, elevation
 
 def main(api_endpoint):
     # Importe HRTF
@@ -20,7 +12,7 @@ def main(api_endpoint):
     hrir = np.array(mat['hnm'])
     hrir = np.swapaxes(hrir,0,2)
     hrir_l = np.array(hrir[0,:,:])
-    hrir_r = np.array(hrir[0,:,:])
+    hrir_r = np.array(hrir[1,:,:])
     hrir_length = hrir.shape[-1]
     fs = mat['fs']
     # HRTF orders
@@ -35,9 +27,9 @@ def main(api_endpoint):
     # if statement to check if the sampling frequency is 48 kHz and resample accordingly
     if(fs != int(48e3)):
         fs = int(48e3)  # Desired sampling frequency
-        cipic_sr = int(44.1e3)
-        up = sr/np.gcd(sr,cipic_sr)
-        down = cipic_sr/np.gcd(sr,cipic_sr)
+        cipic_fs = int(44.1e3)
+        up = fs/np.gcd(fs,cipic_fs)
+        down = cipic_fs/np.gcd(fs,cipic_fs)
         print ('Resample up/down = {up}/{down}')
     else:
         fs = int(48e3)  # Desired sampling frequency
