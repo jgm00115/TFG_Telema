@@ -88,15 +88,18 @@ export default function Stream({ streaming, mediaURL }) {
             console.log(`track names = ${trackNames.current}`);
             if (trackNames[track] == 'main'){
                 audioIO.current.switchAudioChain(0);
+                console.log('main');
                 setShowLabels(true);
             } else if (trackNames[track] == 'ambi'){
                 audioIO.current.switchAudioChain(2);
+                console.log('ambi');
                 setShowLabels(false);
             }
-            else {
+            /*else {
                 audioIO.current.switchAudioChain(1);
+                console.log('mo');
                 setShowLabels(false);
-            }
+            }*/
 
         }
 
@@ -157,8 +160,8 @@ export default function Stream({ streaming, mediaURL }) {
             (track) => parseInt(track.audioChannelConfiguration));
 
         const maxNumChannels = Math.max(...numChannels.current);
-        mainTrackIndex.current = numChannels.current.indexOf(maxNumChannels);
-
+        //mainTrackIndex.current = numChannels.current.indexOf(maxNumChannels);
+        mainTrackIndex.current = trackNames.current.indexOf('ambi');
         console.log(`Number of channels per track = ${numChannels.current}`);
         console.log(`Maximum number of channels = ${maxNumChannels}`);
         console.log(`Main track index = ${mainTrackIndex.current}`);
@@ -195,9 +198,33 @@ export default function Stream({ streaming, mediaURL }) {
             // Select the main track by default
             setTrack(mainTrackIndex.current);
             player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-        } else {
-            console.log("ciao")
-        }
+        } else if (trackNames.current[mainTrackIndex.current] == 'ambi'){
+            audioIO.current.switchAudioChain(2);
+            //audioChain.current = new AudioChain(audioRef.current,
+            //     maxNumChannels, defaultGain, hrtfs);
+
+            console.log(`New audio chain selected`);
+
+            // Update the value of the gains
+            setGains(audioIO.current.getSelectedAudioChain().getFadersGain());
+            setMasterGain(audioIO.current.getMasterGainValue());
+            // Select the main track by default
+            setTrack(mainTrackIndex.current);
+            player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
+        } /*else {   
+            audioIO.current.switchAudioChain(1);
+            //audioChain.current = new AudioChain(audioRef.current,
+            //     maxNumChannels, defaultGain, hrtfs);
+
+            console.log(`New audio chain selected`);
+
+            // Update the value of the gains
+            setGains(audioIO.current.getSelectedAudioChain().getFadersGain());
+            setMasterGain(audioIO.current.getMasterGainValue());
+            // Select the main track by default
+            setTrack(mainTrackIndex.current);
+            player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
+        }*/
     }
 
     return (
