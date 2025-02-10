@@ -15,6 +15,7 @@ export class AudioIO {
         // Create a Gain node to control the master volume
         this._masterGain = this._audioCtx.createGain();
         this._masterGain.gain.value = DEFAULT_GAIN;
+        this._masterGain.channelCount = 2;
         // Connect the master gain node to the audio context destination (speakers)
         this._masterGain.connect(this._audioCtx.destination);
         
