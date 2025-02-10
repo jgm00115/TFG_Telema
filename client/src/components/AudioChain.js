@@ -88,20 +88,25 @@ export class AudioChain {
     }
 
     loadHRTFS(hrtfs) {
-        // Introduce la respuesta al impulso para cada convolver
-        for (let i = 0; i < this._convolverNodes.length; i++){
-            const hrtf = hrtfs[i];
-            // longitud hrtf
-            const length = hrtf.left.length;
-            // respuesta al impulso stereo
-            const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
-            const buffer_l = buffer.getChannelData(0);
-            const buffer_r = buffer.getChannelData(1);
-            for (let n = 0; n < length; n++){
-                buffer_l[n] = hrtf.left[n];
-                buffer_r[n] = hrtf.right[n];
+        console.log("Loading hrtfs", hrtfs);
+        try {
+            // Introduce la respuesta al impulso para cada convolver
+            for (let i = 0; i < this._convolverNodes.length; i++){
+                const hrtf = hrtfs[i];
+                // longitud hrtf
+                const length = hrtf.left.length;
+                // respuesta al impulso stereo
+                const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
+                const buffer_l = buffer.getChannelData(0);
+                const buffer_r = buffer.getChannelData(1);
+                for (let n = 0; n < length; n++){
+                    buffer_l[n] = hrtf.left[n];
+                    buffer_r[n] = hrtf.right[n];
+                }
+                this._convolverNodes[i].buffer = buffer;
             }
-            this._convolverNodes[i].buffer = buffer;
+        } catch (error) {
+            console.error(error)
         }
     }
 

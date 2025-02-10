@@ -1,20 +1,25 @@
+# Use a Node.js 18 base image
 FROM node:18
 
-# Crea directorio de la aplicación
-WORKDIR /usr/src/app
+# Set the working directory inside the container
+WORKDIR /app
 
-# Copia el package.json y el package-loc.json e instala dependencias
+# Copy only the package files to leverage Docker cache for faster builds
 COPY package*.json ./
 
+# Install dependencies
 RUN npm install
 
-# Copia todos al directorio de trabajo (salvo los que aparecen en el .dockerignore)
-
+# Copy all project files to the working directory (Docker will ignore files in .dockerignore)
 COPY . .
 
-# El frontend escucha en el puerto 3000
+# Set environment variables for development
+ENV CHOKIDAR_USEPOLLING=true
+ENV FAST_REFRESH=true
+ENV WATCHPACK_POLLING=true
 
+# Expose port 3000 for the React development server
 EXPOSE 3000
 
-# No está en producción
+# Start the React app
 CMD ["npm", "start"]

@@ -150,12 +150,14 @@ export default function Stream({ streaming, mediaURL }) {
         console.log(`Número de canales por track = ${numChannels.current}`);
         console.log(`Número de canales máximo = ${maxNumChannels}`);
         console.log(`Índice del main = ${mainTrackIndex.current}`);
-
+        console.log("Streaming id", streaming._id);
         // Pide al backend las HRTFS
         const response = await fetch(`/stream/${streaming._id}/hrtfs`);
+        console.log("Respone from /stream/hrtfs:", response);
         const hrtfs = await response.json();
 
         console.log(`Número de HRTFS recuperadas = ${hrtfs.length}`);
+        console.log("HRTFS:", hrtfs);
 
         // INICIALIZA CADENA DE AUDIO
         audioChain.current = new AudioChain(audioRef.current,

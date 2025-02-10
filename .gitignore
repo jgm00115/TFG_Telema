@@ -10,3 +10,5 @@
 /shScripts/*
 !/shScripts/webmTranscoding.zsh
 !/shScripts/webm2Dash.zsh
+/database/*
+/video/*

@@ -5,6 +5,7 @@ import './App.css';
 
 import {useState} from 'react';
 import StreamingList from './pages/StreamList.jsx';
+import ThreeSixtyPlayer from './pages/ThreeSixtyPlayer.jsx';
 
 function App() {
 
@@ -15,20 +16,25 @@ function App() {
   /* Si hay un streaming seleccionado renderiza la vista de streaming
   * Si no, renderiza una vista con los streamings disponibles
   */
+  // return (
+  //   <>
+  //     {selectedStreaming ? (
+  //         <Stream
+  //           streaming={selectedStreaming}
+  //           mediaURL={`media/${selectedStreaming._id}/manifest.mpd`}
+  //         />
+  //     ) : (
+  //       <StreamingList
+  //         setSelectedStreaming={setSelectedStreaming}
+  //       />
+  //     )}
+  //   </>
+  // );
   return (
     <>
-      {selectedStreaming ? (
-          <Stream
-            streaming={selectedStreaming}
-            mediaURL={`media/${selectedStreaming._id}/manifest.mpd`}
-          />
-      ) : (
-        <StreamingList
-          setSelectedStreaming={setSelectedStreaming}
-        />
-      )}
+      <ThreeSixtyPlayer/>
     </>
-  );
+  )
 }
 
 export default App;

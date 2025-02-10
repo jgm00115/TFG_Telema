@@ -5,9 +5,12 @@ services:
     build: ./client
     ports:
       - '3000:3000'
+    volumes:
+      - ./client:/app  # Mount local client directory to the container
+      - /app/node_modules  # Prevent overwriting node_modules
   backend:
     build: ./server
-    restart: always
+    # restart: always
     ports:
       - '8080:8080'
     volumes:
@@ -18,7 +21,7 @@ services:
       - mongo
   mongo:
     image: mongo:6.0.6
-    restart: always
+    # restart: always
     volumes:
       - ./database/init/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
       - mongoData:/data/db
@@ -28,9 +31,11 @@ services:
       MONGO_INITDB_DATABASE: App
       INIT_DB_USER: admin
       INIT_DB_PASSWORD: admin
+    ports:
+      - 27017:27017
   mongo-express:
     image: mongo-express:1.0.0-alpha
-    restart: always
+    # restart: always
     ports:
       - 8081:8081
     environment:
