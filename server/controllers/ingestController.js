@@ -3,7 +3,7 @@
 * 
 * Callbacks to process requests related to streams
 */
-
+// TODO: check standard xml format for .mpd files
 const fs = require('fs');
 const path = require('path');
 const chokidar = require('chokidar');
