@@ -48,12 +48,12 @@ export default function Stream({ streaming, mediaURL }) {
         // Initialize the dash player and link it to the audio element (autoplay true)
         player.current.initialize(audioRef.current, mediaURL, true);
 
-        }, []);
+    }, []);
 
-        // Executes when gains are updated
-        useEffect(() => {
+    // Executes when gains are updated
+    useEffect(() => {
 
-        
+
 
         // IF THE AUDIO CHAIN IS INITIALIZED
         if (audioIO.current != null) {
@@ -64,17 +64,17 @@ export default function Stream({ streaming, mediaURL }) {
 
         }
 
-        }, [gains]);
-        // Executes when the master gain is updated
-        useEffect(()=>{
-        
-        if (audioIO.current  != null) {
+    }, [gains]);
+    // Executes when the master gain is updated
+    useEffect(() => {
+
+        if (audioIO.current != null) {
             console.log(`Master gain = ${masterGain}`);
             audioIO.current.setMasterGain(masterGain);
         }
-        },[masterGain]);
-        // Executes when the selected track is updated
-        useEffect(() => {
+    }, [masterGain]);
+    // Executes when the selected track is updated
+    useEffect(() => {
 
         if (audioIO.current != null) {
             console.log(`Active track = ${track}`);
@@ -88,16 +88,16 @@ export default function Stream({ streaming, mediaURL }) {
             // And also add names to the faders
             console.log(`track = ${track}`);
             console.log(`track names = ${trackNames.current}`);
-            if (trackNames.current[track] == 'main'){
+            if (trackNames.current[track] == 'main') {
                 audioIO.current.switchAudioChain(0);
                 console.log('main');
                 setShowLabels(true);
-            } else if (trackNames.current[track] == 'ambi'){
+            } else if (trackNames.current[track] == 'ambi') {
                 audioIO.current.switchAudioChain(2);
                 console.log('ambi');
                 setShowLabels(false);
             }
-            else if(trackNames.current[track] == 'cellos' || trackNames.current[track] == 'flutes' || trackNames.current[track] == 'violins') {
+            else if (trackNames.current[track] == 'cellos' || trackNames.current[track] == 'flutes' || trackNames.current[track] == 'violins') {
                 audioIO.current.switchAudioChain(1);
                 console.log('mo');
                 setShowLabels(false);
@@ -105,34 +105,40 @@ export default function Stream({ streaming, mediaURL }) {
 
         }
 
-        }, [track]);
-    
+    }, [track]);
+
     //TODO: adding a different component for the Ambisonics HRTF for 3dof + 6dof
     // Executes when the rotation is updated 
     useEffect(() => {
-        async function loadHRTFS (){
-            
+        async function loadHRTFS() {
+
             if (audioIO.current != null) {
                 console.log(`rotation = ${rotation}`);
                 let rotatedHRTFs;
-                if(rotation != 0){
-                    // Request new HRTFS
-                    const response = await fetch(`/stream/${streaming._id}/hrtfs/${rotation}`);
-                    rotatedHRTFs = await response.json();
-                } else {
-                    // If the rotation is 0, request the base HRTF
-                    const response = await fetch(`/stream/${streaming._id}/hrtfs/`);
-                    rotatedHRTFs = await response.json();
+                if (trackNames.current[mainTrackIndex.current] == "main") {
+                    if (rotation != 0) {
+                        // Request new HRTFS
+                        const response = await fetch(`/stream/${streaming._id}/hrtfs/${rotation}`);
+                        rotatedHRTFs = await response.json();
+                    } else {
+                        // If the rotation is 0, request the base HRTF
+                        const response = await fetch(`/stream/${streaming._id}/hrtfs/`);
+                        rotatedHRTFs = await response.json();
+                    }
+                    // Load hrtfs into convolvers
+                    audioIO.current.getAudioChain(0).loadHRTFS(rotatedHRTFs);
+                    console.log('rotatedHRTFs:');
+                    console.log(rotatedHRTFs);
+                } else if (trackNames.current[mainTrackIndex.current] == "ambi") {
+                    audioIO.current.getAudioChain(2).rotateScene(rotation, 0);
                 }
-                console.log('rotatedHRTFs:');
-                console.log(rotatedHRTFs);
-            
-            // Load hrtfs into convolvers
-            audioIO.current.getAudioChain(0).loadHRTFS(rotatedHRTFs);
+
+
+
             }
         }
         loadHRTFS();
-    },[rotation]);
+    }, [rotation]);
 
     const onPlay = async () => {
         console.log('onPlay');
@@ -149,7 +155,7 @@ export default function Stream({ streaming, mediaURL }) {
 
         // Update the name of the tracks
         let trackLangs = [];
-        for (let trackL of tracks){
+        for (let trackL of tracks) {
             trackLangs.push(trackL.lang);
         }
 
@@ -163,7 +169,7 @@ export default function Stream({ streaming, mediaURL }) {
 
         const maxNumChannels = Math.max(...numChannels.current);
         //mainTrackIndex.current = numChannels.current.indexOf(maxNumChannels);
-        mainTrackIndex.current = trackNames.current.indexOf('flutes');
+        mainTrackIndex.current = trackNames.current.indexOf('ambi');
         console.log(`Number of channels per track = ${numChannels.current}`);
         console.log(`Maximum number of channels = ${maxNumChannels}`);
         console.log(`Main track index = ${mainTrackIndex.current}`);
@@ -180,15 +186,15 @@ export default function Stream({ streaming, mediaURL }) {
         console.log(ambiHrtfs);
 
         // Create a new audioIO and multiple audio chains
-        audioIO.current = new AudioIO(audioRef.current,maxNumChannels);
+        audioIO.current = new AudioIO(audioRef.current, maxNumChannels);
         audioIO.current.addAudioChain(new SSSAudioChain(audioIO.current.getAudioCtx(), maxNumChannels, defaultGain, hrtfs));
         audioIO.current.addAudioChain(new MOAudioChain(audioIO.current.getAudioCtx(), 2, defaultGain));
-        audioIO.current.addAudioChain(new AmbiAudioChain(audioIO.current.getAudioCtx(), 2, defaultGain,ambiHrtfs));
-       
+        audioIO.current.addAudioChain(new AmbiAudioChain(audioIO.current.getAudioCtx(), 2, defaultGain, ambiHrtfs));
+
 
         // INITIALIZE AUDIO CHAIN
         console.log(`Selected track name = ${trackNames.current[mainTrackIndex.current]}`);
-        if(trackNames.current[mainTrackIndex.current]  == 'main') {
+        if (trackNames.current[mainTrackIndex.current] == 'main') {
             audioIO.current.switchAudioChain(0);
             //audioChain.current = new AudioChain(audioRef.current,
             //     maxNumChannels, defaultGain, hrtfs);
@@ -201,7 +207,7 @@ export default function Stream({ streaming, mediaURL }) {
             // Select the main track by default
             setTrack(mainTrackIndex.current);
             player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-        } else if (trackNames.current[mainTrackIndex.current] == 'ambi'){
+        } else if (trackNames.current[mainTrackIndex.current] == 'ambi') {
             audioIO.current.switchAudioChain(2);
             //audioChain.current = new AudioChain(audioRef.current,
             //     maxNumChannels, defaultGain, hrtfs);
@@ -214,7 +220,7 @@ export default function Stream({ streaming, mediaURL }) {
             // Select the main track by default
             setTrack(mainTrackIndex.current);
             player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-        }   else if (trackNames.current[mainTrackIndex.current] == 'cellos' || trackNames.current[mainTrackIndex.current] == 'flutes' || trackNames.current[mainTrackIndex.current] == 'violins') {    
+        } else if (trackNames.current[mainTrackIndex.current] == 'cellos' || trackNames.current[mainTrackIndex.current] == 'flutes' || trackNames.current[mainTrackIndex.current] == 'violins') {
             audioIO.current.switchAudioChain(1);
             //audioChain.current = new AudioChain(audioRef.current,
             //     maxNumChannels, defaultGain, hrtfs);
@@ -246,13 +252,13 @@ export default function Stream({ streaming, mediaURL }) {
             />
             {track == mainTrackIndex.current ? (
                 <RotationSelector
-                rotation={rotation}
-                setRotation={setRotation}
-                min={-90}
-                max={90}
-                step={5}
-            />
-            ): null}
+                    rotation={rotation}
+                    setRotation={setRotation}
+                    min={-90}
+                    max={90}
+                    step={5}
+                />
+            ) : null}
             <Mixer
                 gains={gains}
                 setGains={setGains}
@@ -263,7 +269,7 @@ export default function Stream({ streaming, mediaURL }) {
             <Fader
                 className='Master'
                 gain={masterGain}
-                setGain={(event)=>setMasterGain(event.target.value)}
+                setGain={(event) => setMasterGain(event.target.value)}
                 min={0}
                 max={2}
                 step={0.1}
