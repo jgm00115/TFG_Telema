@@ -12,6 +12,8 @@ import { AudioIO } from '../components/AudioIO';
 import { MOAudioChain } from '../components/MOAudioChain';
 import { AmbiAudioChain } from '../components/AmbiAudioChain';
 
+
+// Stream component
 export default function Stream({ streaming, mediaURL }) {
     console.log('Stream');
     // Stateless variables (their value persists between re-renders)
@@ -86,20 +88,20 @@ export default function Stream({ streaming, mediaURL }) {
             // And also add names to the faders
             console.log(`track = ${track}`);
             console.log(`track names = ${trackNames.current}`);
-            if (trackNames[track] == 'main'){
+            if (trackNames.current[track] == 'main'){
                 audioIO.current.switchAudioChain(0);
                 console.log('main');
                 setShowLabels(true);
-            } else if (trackNames[track] == 'ambi'){
+            } else if (trackNames.current[track] == 'ambi'){
                 audioIO.current.switchAudioChain(2);
                 console.log('ambi');
                 setShowLabels(false);
             }
-            /*else {
+            else if(trackNames.current[track] == 'cellos' || trackNames.current[track] == 'flutes' || trackNames.current[track] == 'violins') {
                 audioIO.current.switchAudioChain(1);
                 console.log('mo');
                 setShowLabels(false);
-            }*/
+            }
 
         }
 
@@ -161,7 +163,7 @@ export default function Stream({ streaming, mediaURL }) {
 
         const maxNumChannels = Math.max(...numChannels.current);
         //mainTrackIndex.current = numChannels.current.indexOf(maxNumChannels);
-        mainTrackIndex.current = trackNames.current.indexOf('ambi');
+        mainTrackIndex.current = trackNames.current.indexOf('flutes');
         console.log(`Number of channels per track = ${numChannels.current}`);
         console.log(`Maximum number of channels = ${maxNumChannels}`);
         console.log(`Main track index = ${mainTrackIndex.current}`);
@@ -185,6 +187,7 @@ export default function Stream({ streaming, mediaURL }) {
        
 
         // INITIALIZE AUDIO CHAIN
+        console.log(`Selected track name = ${trackNames.current[mainTrackIndex.current]}`);
         if(trackNames.current[mainTrackIndex.current]  == 'main') {
             audioIO.current.switchAudioChain(0);
             //audioChain.current = new AudioChain(audioRef.current,
@@ -211,7 +214,7 @@ export default function Stream({ streaming, mediaURL }) {
             // Select the main track by default
             setTrack(mainTrackIndex.current);
             player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-        } /*else {   
+        }   else if (trackNames.current[mainTrackIndex.current] == 'cellos' || trackNames.current[mainTrackIndex.current] == 'flutes' || trackNames.current[mainTrackIndex.current] == 'violins') {    
             audioIO.current.switchAudioChain(1);
             //audioChain.current = new AudioChain(audioRef.current,
             //     maxNumChannels, defaultGain, hrtfs);
@@ -224,7 +227,7 @@ export default function Stream({ streaming, mediaURL }) {
             // Select the main track by default
             setTrack(mainTrackIndex.current);
             player.current.setCurrentTrack(tracks[mainTrackIndex.current]);
-        }*/
+        }
     }
 
     return (
