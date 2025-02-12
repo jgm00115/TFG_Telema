@@ -1,8 +1,9 @@
 const Stream = require('../models/stream');
 const HRTF = require('../models/hrtf');
+const AMBIHRTF = require('../models/ambihrtf');
 
-// Devuelve todos los streams
-exports.getStreams = (req,res) => {
+// Returns all streams
+exports.getStreams = (req, res) => {
     Stream.find({})
     .then((streams) => {
         res.json(streams);
@@ -13,16 +14,18 @@ exports.getStreams = (req,res) => {
     })
 }
 
-// Crea un nuevo stream y devuelve el id si hay éxito
+// Creates a new stream and returns the id if successful
 exports.postStream = (req,res) => {
+    console.log(req.body);
     const stream = new Stream({
         'title': req.body.title,
         'description': req.body.description,
         'instruments': req.body.instruments,
+        'sh_order': req.body.sh_order,
     });
     stream.save()
-    .then((savedStream)=> {
-        console.log(`Nuevo stream con id ${savedStream._id}`);
+    .then((savedStream) => {
+        console.log(`New stream with id ${savedStream._id}`);
         res.status(200).json({id: savedStream._id});
     })
     .catch((err) => {
@@ -31,17 +34,17 @@ exports.postStream = (req,res) => {
     });
 }
 
-// Devuelve todas las HRTFs de los instrumentos de un stream
-exports.getStreamHRTFS = (req,res) => {
+// Returns all HRTFs of the instruments of a stream
+exports.getStreamHRTFS = (req, res) => {
     const streamID = req.params.id;
     Stream.findById(streamID)
-    .then(async (stream)=> {
-        if(!stream){
-            console.log(`No existe ningún stream con id ${streamID}`);
+    .then(async (stream) => {
+        if (!stream) {
+            console.log(`No stream exists with id ${streamID}, hrtf`);
             res.sendStatus(404);
         }
         const hrtfs = await stream.getHRTFS();
-        console.log(`Se han recuperado ${hrtfs.length} hrtfs para el streaming ${streamID}`);
+        console.log(`Retrieved ${hrtfs.length} hrtfs for stream ${streamID}`);
         res.status(200).json(hrtfs);
     })
     .catch((err) => {
@@ -50,14 +53,38 @@ exports.getStreamHRTFS = (req,res) => {
     })
 }
 
-// Devuelve un set de HRTFS añadiendo rotación a la espacializacion
+
+
+// Returns all AmbiHRTFs of the correct order of a stream
+
+exports.getStreamAmbiHRTFS = (req, res) => {
+    const streamID = req.params.id;
+    Stream.findById(streamID) 
+    .then(async (stream) => {
+        if (!stream) {
+            console.log(`No stream exists with id ${streamID}`);
+            res.sendStatus(404);
+        }
+        console.log(`stream= ${stream}`);
+        const ambihrtfs = await stream.getAmbiHRTFS();
+        console.log(`Retrieved ${ambihrtfs.length} ambi hrtfs for stream ${streamID}`);
+        res.status(200).json(ambihrtfs);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+    })
+}
+
+
+// Returns a set of HRTFs adding rotation to the spatialization
 exports.rotate = async (req, res) => {
     const streamID = req.params.id;
     const rotation = parseInt(req.params.rotation);
     try {
         const stream = await Stream.findById(streamID);
-        if (!stream){
-            console.log(`No existe ningún stream con id ${streamID}`);
+        if (!stream) {
+            console.log(`No stream exists with id ${streamID}`);
             res.sendStatus(404);
         }
         const rotatedHrtfs = await stream.rotate(rotation);
@@ -66,6 +93,4 @@ exports.rotate = async (req, res) => {
         console.log(err);
         res.sendStatus(500);
     }
-    
-
 }

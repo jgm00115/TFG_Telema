@@ -1,35 +1,22 @@
+#! /Users/christopherditchburn/miniconda3/envs/head/bin/python
 import requests, json, datetime, subprocess
 import numpy as np
 
 def setStreamData():
     # Instrument groups in each main channel
-    instruments = [
-        {'name': 'AS', 'channel': 0},
-        {'name': 'CB_A', 'channel': 1},
-        {'name': 'CL', 'channel': 2},
-        {'name': 'FG', 'channel': 3},
-        {'name': 'FL', 'channel': 4},
-        {'name': 'HR', 'channel': 5},
-        {'name': 'OB', 'channel': 6},
-        {'name': 'TB', 'channel': 7},
-        {'name': 'TI', 'channel': 8},
-        {'name': 'TM', 'channel': 9},
-        {'name': 'TR', 'channel': 10},
-        {'name': 'TU', 'channel': 11},
-        {'name': 'VC_A', 'channel': 12},
-        {'name': 'VN_I', 'channel': 13},
-        {'name': 'VN_II', 'channel': 14}
+    position = [
+        {'name': 'POS1', 'channel': 0},
+        
     ]
-    azimuths = [0,80,-20,20,-15,40,15,55,-5,-15,30,65,80,-80,-65]
-    elevations = np.zeros(len(azimuths)).astype('int').tolist()
-    for instrument,az,el in zip(instruments,azimuths,elevations):
-        instrument['azimuth'] = az
-        instrument['elevation'] = el
+    X = [0]
+    Y = [0]
+    for pos,x,y in zip(position,X,Y):
+        pos['x'] = x
+        pos['y'] = y
     data = {
-        'title': f'testing-{datetime.date.today()} POL ambi2',
+        'title': f'testing-{datetime.date.today()}-3DOF',
         'description': 'functionality test',
-        'instruments': instruments,
-        'sh_order': 2
+        'positions': position
     }
     return data
 
@@ -94,19 +81,11 @@ if __name__ == '__main__':
     
     # audio files to process with ffmpeg
     audiofiles = [
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VC.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/FL.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VN_I.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/MAIN.wav'
+            "audio/3DOF/pos1.wav",
     ]
 
     group_names = [
-            'cellos',
-            'flutes',
-            'violins',
-            'ambi',
-            'main'
-           
+            'pos1',
     ]
 
     server_addr = 'localhost:8080'

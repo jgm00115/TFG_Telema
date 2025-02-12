@@ -16,7 +16,7 @@ const ThreeSixtyPlayer = forwardRef((props, ref) => {
   // Manage video playback and audio setup
   const { videoElement, handlePlay } = useVideoPlayback(videoRef, setupAudioProcessing);
 
-  // Expose audio-related methods via ref
+  // Expose via ref
   useImperativeHandle(ref, () => ({
     getAudioTracks: () => audioTracks,
     selectAudioTrack: (index) => {

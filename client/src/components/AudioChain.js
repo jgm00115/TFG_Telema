@@ -1,6 +1,6 @@
 export class AudioChain {
 
-    // Atributos
+    // Attributes
     _audioCtx = null;
     _sourceNode = null;
     _splitterNode = null;
@@ -11,55 +11,55 @@ export class AudioChain {
 
     // Constructor
     constructor(audioRef, maxNumChannels, defaultGain, hrtfs) {
-            console.log(`Creando nueva cadena de audio: 
-            Maximo número de canales = ${maxNumChannels},
-            Ganancia por defecto = ${defaultGain}`);
-            // crea nuevo contexto de audio
+            console.log(`Creating new audio chain: 
+            Maximum number of channels = ${maxNumChannels},
+            Default gain = ${defaultGain}`);
+            // create new audio context
             this._audioCtx = new AudioContext({sampleRate:48000});
-            // crea nodo fuente
+            // create source node
             this._sourceNode = this._audioCtx.createMediaElementSource(audioRef);
             this._sourceNode.channelCount = maxNumChannels;
             this._sourceNode.channelInterpretation = 'discrete';
-            // crea un splitter
+            // create a splitter
             this._splitterNode = this._audioCtx.createChannelSplitter(maxNumChannels);
-            // crea un merger mono
+            // create a mono merger
             this._mergerNode = this._audioCtx.createChannelMerger(1);
-            // crea un nodo de ganancia maestro
+            // create a master gain node
             this._masterGain = this._audioCtx.createGain();
             this._masterGain.gain.value = 1;
-            // conecta la fuente al splitter
+            // connect the source to the splitter
             this._sourceNode.connect(this._splitterNode);
-            // crea nodos de ganancia y convolvers
+            // create gain nodes and convolvers
             for (let i = 0; i < maxNumChannels; i++){
                 this._gainNodes.push(this._audioCtx.createGain());
                 this._convolverNodes.push(this._audioCtx.createConvolver());
-                // asigna valor por defecto al nodo de ganancia
+                // set default value to the gain node
                 this._gainNodes[i].gain.value = defaultGain;
-                // deshabilita normalizacion en convolvers
+                // disable normalization in convolvers
                 this._convolverNodes[i].normalize = false;
-                // Conecta el splitter a los nodos de ganancia
+                // Connect the splitter to the gain nodes
                 this._splitterNode.connect(this._gainNodes[i], i);
             }
-            // Carga las hrtfs
+            // Load the HRTFs
             this.loadHRTFS(hrtfs)
             for (let i = 0; i < maxNumChannels; i++){
-                // Conecta nodos de ganancia a convolvers
+                // Connect gain nodes to convolvers
                 this._gainNodes[i].connect(this._convolverNodes[i]);
-                // Conecta convolvers al fader maestro
+                // Connect convolvers to the master fader
                 this._convolverNodes[i].connect(this._masterGain);
 
             }
             console.log(this._convolverNodes[0]);
-            // Conecta el mono merger al maestro
+            // Connect the mono merger to the master
             this._mergerNode.connect(this._masterGain);
-            // Conecta el maestro a la salida
+            // Connect the master to the output
             this._masterGain.connect(this._audioCtx.destination);
 
     }
 
     /** 
-    * Actualiza el valor de las ganancias de los faders
-    * @param {int[]} gains - Array con nuevas ganancias
+    * Updates the gain values of the faders
+    * @param {int[]} gains - Array with new gains
     */
     setFadersGain(gains) {
         for (let i = 0; i < this._gainNodes.length; i++) {
@@ -68,7 +68,7 @@ export class AudioChain {
     }
 
     /** 
-    * Devuelve un array con las ganancias de los faders.
+    * Returns an array with the gains of the faders.
     * @return {float[]} Brief description of the returning value here.
     */
     getFadersGain() {
@@ -88,42 +88,37 @@ export class AudioChain {
     }
 
     loadHRTFS(hrtfs) {
-        console.log("Loading hrtfs", hrtfs);
-        try {
-            // Introduce la respuesta al impulso para cada convolver
-            for (let i = 0; i < this._convolverNodes.length; i++){
-                const hrtf = hrtfs[i];
-                // longitud hrtf
-                const length = hrtf.left.length;
-                // respuesta al impulso stereo
-                const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
-                const buffer_l = buffer.getChannelData(0);
-                const buffer_r = buffer.getChannelData(1);
-                for (let n = 0; n < length; n++){
-                    buffer_l[n] = hrtf.left[n];
-                    buffer_r[n] = hrtf.right[n];
-                }
-                this._convolverNodes[i].buffer = buffer;
+        // Introduce la respuesta al impulso para cada convolver
+        for (let i = 0; i < this._convolverNodes.length; i++){
+            const hrtf = hrtfs[i];
+            // longitud hrtf
+            const length = hrtf.left.length;
+            // respuesta al impulso stereo
+            const buffer = this._audioCtx.createBuffer(2,length,hrtf.samplerate);
+            const buffer_l = buffer.getChannelData(0);
+            const buffer_r = buffer.getChannelData(1);
+            for (let n = 0; n < length; n++){
+                buffer_l[n] = hrtf.left[n];
+                buffer_r[n] = hrtf.right[n];
             }
-        } catch (error) {
-            console.error(error)
+            this._convolverNodes[i].buffer = buffer;
         }
     }
 
     bypassConvolvers(bypass){
         if(bypass){
             for(let i = 0; i < this._gainNodes.length; i++){
-                // Desconecta los nodos de ganancia de los convolvers
+                // Disconnect the gain nodes from the convolvers
                 this._gainNodes[i].disconnect();
-                // Conecta al merger
+                // Connect to the merger
                 this._gainNodes[i].connect(this._mergerNode);
                 console.log(this._masterGain);
             }
         } else {
             for(let i = 0; i < this._gainNodes.length; i++){
-                // Desconecta los nodos de ganancia del merger
+                // Disconnect the gain nodes from the merger
                 this._gainNodes[i].disconnect();
-                // Conecta con convolvers
+                // Connect to convolvers
                 this._gainNodes[i].connect(this._convolverNodes[i]);
                 console.log(this._masterGain);
             }
