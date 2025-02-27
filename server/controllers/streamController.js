@@ -14,6 +14,24 @@ exports.getStreams = (req, res) => {
     })
 }
 
+// Get stream by id
+exports.getStream = (req, res) => {
+    console.log("inside get stream");
+    const streamID = req.params.id;
+    Stream.findById(streamID)
+    .then((stream) => {
+        if (!stream) {
+            console.log(`No stream exists with id ${streamID}`);
+            res.sendStatus(404);
+        }
+        res.json(stream);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+    })
+}
+
 // Creates a new stream and returns the id if successful
 exports.postStream = (req,res) => {
     console.log(req.body);
@@ -68,6 +86,7 @@ exports.getStreamAmbiHRTFS = (req, res) => {
         console.log(`stream= ${stream}`);
         const ambihrtfs = await stream.getAmbiHRTFS();
         console.log(`Retrieved ${ambihrtfs.length} ambi hrtfs for stream ${streamID}`);
+        console.log("Testing update.....")
         res.status(200).json(ambihrtfs);
     })
     .catch((err) => {

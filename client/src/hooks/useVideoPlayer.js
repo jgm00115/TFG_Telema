@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function useVideoPlayback(videoRef, setupAudioProcessing) {
+export function useVideoPlayer(videoRef, setupAudioProcessing) {
   const [videoElement, setVideoElement] = useState(null);
 
   useEffect(() => {
@@ -8,7 +8,7 @@ export function useVideoPlayback(videoRef, setupAudioProcessing) {
       setVideoElement(videoRef.current);
       setupAudioProcessing(videoRef.current);
     }
-  }, [videoRef, setupAudioProcessing]);
+  }, [videoRef, videoElement, setupAudioProcessing]);
 
   const handlePlay = () => {
     if (videoElement) {

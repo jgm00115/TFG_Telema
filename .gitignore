@@ -5,6 +5,9 @@
 /server/test.js
 /client/.gitignore
 /client/readme.md
+/client/node_modules
+/node_modules
+/dash_output/*
 /public/multichannel_*
 /media
 /shScripts/*

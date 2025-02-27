@@ -1,3 +1,4 @@
+#! /Users/jaimegarcia/miniconda3/envs/head/bin/python
 import requests, json, datetime, subprocess
 import numpy as np
 
@@ -94,17 +95,16 @@ if __name__ == '__main__':
     
     # audio files to process with ffmpeg
     audiofiles = [
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VC.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/FL.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VN_I.wav',
-            '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/MAIN.wav'
+        '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VC.wav',
+        '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/FL.wav',
+        '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/VN_I.wav',
+        '/Users/christopherditchburn/Spork/TFG_Telema/audio/Unaligned/MAIN.wav'
     ]
 
     group_names = [
             'cellos',
             'flutes',
             'violins',
-            'ambi',
             'main'
            
     ]

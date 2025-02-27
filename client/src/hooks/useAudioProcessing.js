@@ -7,6 +7,11 @@ export function useAudioProcessing(videoElement) {
   const setupAudioProcessing = () => {
     if (!videoElement) return;
 
+    if (audioContextRef.current && audioSourceRef.current) {
+      console.warn('Audio processing already set up');
+      return;
+    }
+
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     audioContextRef.current = audioContext;
 

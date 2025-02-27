@@ -1,8 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { setCameraRotation, setFovRotation } from '../../store/reducers/streamReducer';
 
-const VideoSphereManual = ({ videoElement }) => {
+const VideoSphereManual = ({ videoElement, onCameraRotate }) => {
+
+  const dispatch = useDispatch();
+
   const containerRef = useRef(null);
   const videoTextureRef = useRef(null);
   const sceneRef = useRef(null);
@@ -41,7 +46,7 @@ const VideoSphereManual = ({ videoElement }) => {
     window.addEventListener('resize', handleResize);
 
     // 2. Create VideoTexture
-    const videoTexture = new THREE.VideoTexture(videoElement);
+    const videoTexture = new THREE.VideoTexture(videoElement.current);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
@@ -80,10 +85,25 @@ const VideoSphereManual = ({ videoElement }) => {
       renderer.render(scene, camera);
     };
 
+    const intervalId = setInterval(() => {
+      if (cameraRef.current) {
+        // x = pitch, y = roll, z = yaw
+        const { x, y, z } = cameraRef.current.rotation;
+        const direction = new THREE.Vector3();
+        cameraRef.current.getWorldDirection(direction);
+        const forwardX = direction.x;
+        const forwardZ = direction.z;
+        const rotationYaw = Math.atan2(forwardX, forwardZ);
+        dispatch(setCameraRotation([x, y, z]));
+        dispatch(setFovRotation(rotationYaw));
+      }
+    }, 500); // Runs every 500ms
+  
+
     animate();  // Start the animation loop
 
     return () => {
-      // Cleanup on unmount
+      clearInterval(intervalId);  // Clear the interval
       window.removeEventListener('resize', handleResize);  // Remove resize listener
       renderer.dispose();  // Free WebGL resources
       videoTexture.dispose();  // Free video texture resources
@@ -92,7 +112,9 @@ const VideoSphereManual = ({ videoElement }) => {
     };
   }, [videoElement]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100vh' }} />;
+  return (<div>
+    <div ref={containerRef} style={{ width: '100%', position: "absolute", height: '100vh', zIndex: -1 }} />
+    </div>)
 };
 
 export default VideoSphereManual;

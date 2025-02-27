@@ -1,40 +1,38 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function StreamingList({setSelectedStreaming}){
+export default function StreamingList() {
+  const [streamingData, setStreamingData] = useState([]);
+  const navigate = useNavigate(); // React Router navigation function
 
-    const [streamingData, setStreamingData] = useState([]);
+  function handleClick(event) {
+    const streamID = event.target.id;
+    navigate(`/streaming/${streamID}`); // Navigate to stream details page
+  }
 
-    function handleClick(event){
-        const streamID = event.target.id;
-        const selectedStreaming = streamingData.find(
-            (stream)=> stream._id == streamID);
-        setSelectedStreaming(selectedStreaming);
-    }
+  // Retrieve the info of all streamings
+  useEffect(() => {
+    fetch("/stream/")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Streaming data", data)
+        setStreamingData(data);
+      });
+  }, []);
 
-    // Retrieve the info of all streamings
-    useEffect(()=> {
-        fetch('/stream/')
-        .then((response) => response.json())
-        .then((data) => {
-            setStreamingData(data);
-        });
-    },[]);
+  console.log(`Streamings data = ${JSON.stringify(streamingData)}`);
 
-    console.log(`Streamings data = ${JSON.stringify(streamingData)}`);
-
-    return (
-        <>
-            <ul>
-                {streamingData.map((stream) => {
-                    return(
-                    <li key={stream._id} >
-                        <p id={stream._id} onClick={handleClick}>
-                            {stream.title}
-                        </p>
-                    </li>
-                    );
-                })}    
-            </ul>
-        </>
-    );
+  return (
+    <>
+      <ul>
+        {streamingData.map((stream) => (
+          <li key={stream._id}>
+            <p id={stream._id} onClick={handleClick} style={{ cursor: "pointer", color: "blue" }}>
+              {stream.title}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </>
+  );
 }

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MPD xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns="urn:mpeg:dash:schema:mpd:2011"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xsi:schemaLocation="urn:mpeg:dash:schema:MPD:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd"
+     profiles="urn:mpeg:dash:profile:isoff-live:2011"
+     type="static"
+     mediaPresentationDuration="PT6M40.0S"
+     maxSegmentDuration="PT4.0S"
+     minBufferTime="PT8.5S">
+
+    <Period id="0" start="PT0.0S">
+
+        <!-- ===================== 4 VIDEO ANGLES ===================== -->
+        <AdaptationSet id="0" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <!-- Angle 1 -->
+            <Representation id="angle1-12k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="50000000" width="12288" height="6144" />
+            <Representation id="angle1-8k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="25000000" width="8192" height="4096" />
+            <Representation id="angle1-4k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="10000000" width="4096" height="2048" />
+        </AdaptationSet>
+
+        <AdaptationSet id="1" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <!-- Angle 2 -->
+            <Representation id="angle2-12k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="50000000" width="12288" height="6144" />
+            <Representation id="angle2-8k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="25000000" width="8192" height="4096" />
+            <Representation id="angle2-4k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="10000000" width="4096" height="2048" />
+        </AdaptationSet>
+
+        <AdaptationSet id="2" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <!-- Angle 3 -->
+            <Representation id="angle3-12k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="50000000" width="12288" height="6144" />
+            <Representation id="angle3-8k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="25000000" width="8192" height="4096" />
+            <Representation id="angle3-4k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="10000000" width="4096" height="2048" />
+        </AdaptationSet>
+
+        <AdaptationSet id="3" contentType="video" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <!-- Angle 4 -->
+            <Representation id="angle4-12k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="50000000" width="12288" height="6144" />
+            <Representation id="angle4-8k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="25000000" width="8192" height="4096" />
+            <Representation id="angle4-4k" mimeType="video/webm" codecs="vp09.00.50.08" bandwidth="10000000" width="4096" height="2048" />
+        </AdaptationSet>
+
+        <!-- ===================== 13 STEREO AUDIO TRACKS ===================== -->
+        <AdaptationSet id="4" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <Representation id="stereo1" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000">
+                <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2" />
+            </Representation>
+            <Representation id="stereo2" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo3" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo4" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo5" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo6" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo7" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo8" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo9" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo10" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo11" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo12" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+            <Representation id="stereo13" mimeType="audio/webm" codecs="opus" bandwidth="128000" audioSamplingRate="48000" />
+        </AdaptationSet>
+
+        <!-- ===================== 1 AMBISONIC 9-CHANNEL TRACK ===================== -->
+        <AdaptationSet id="5" contentType="audio" startWithSAP="1" segmentAlignment="true" bitstreamSwitching="true">
+            <Representation id="ambi9" mimeType="audio/webm" codecs="opus" bandwidth="576000" audioSamplingRate="48000">
+                <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="9" />
+            </Representation>
+        </AdaptationSet>
+
+    </Period>
+</MPD>

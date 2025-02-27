@@ -8,6 +8,9 @@ services:
     volumes:
       - ./client:/app  # Mount local client directory to the container
       - /app/node_modules  # Prevent overwriting node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
   backend:
     build: ./server
     # restart: always
