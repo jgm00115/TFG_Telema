@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setIsMenuOpen } from "../store/reducers/streamReducer";
 
 export default function StreamingList() {
   const [streamingData, setStreamingData] = useState([]);
   const navigate = useNavigate(); // React Router navigation function
-
+  const dispatch = useDispatch();
   function handleClick(event) {
     const streamID = event.target.id;
     navigate(`/streaming/${streamID}`); // Navigate to stream details page
@@ -12,6 +14,7 @@ export default function StreamingList() {
 
   // Retrieve the info of all streamings
   useEffect(() => {
+    dispatch(setIsMenuOpen(false))
     fetch("/stream/")
       .then((response) => response.json())
       .then((data) => {

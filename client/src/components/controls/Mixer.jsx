@@ -13,7 +13,7 @@ const MixerContainer = styled.div`
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
+  max-width: 800px;
 `;
 
 export default function Mixer({ gains, setGains, numFaders, faderLabels }) {

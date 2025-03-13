@@ -4,17 +4,22 @@ const initialState = {
   streaming: null,
   mediaURL: null,
   track: 0,
-  numTracks: 0,
+  numTracks: 1,
   trackNames: [],
   numChannels: [],
+  instruments: [],
+  cameras: [],
+  currentCamera: null,
   gains: [],
   masterGain: 1,
   rotation: 0,
   isMenuOpen: false,
   playing: false,
-  mode: "sss",
+  mode: "SSS",
   cameraRotation: [0, 0, 0],
-  fovRotation: 0,
+  fovRotation: null,
+  showControls: true,
+  availableModes: ["SSS", "3DOF", "6DOF"],
 };
 
 const streamSlice = createSlice({
@@ -25,6 +30,9 @@ const streamSlice = createSlice({
       state.streaming = action.payload;
       console.log("Streaming:", action.payload);
       state.mediaURL = `/media/${action.payload._id}/manifest.mpd`;
+      state.instruments = action.payload.instruments;
+      state.cameras = action.payload.cameras;
+      state.currentCamera = action.payload.cameras[0] || null;
     },
     setTrack(state, action) {
       state.track = action.payload;
@@ -64,6 +72,21 @@ const streamSlice = createSlice({
     },
     setFovRotation(state, action) {
       state.fovRotation = action.payload
+    },
+    setShowControls(state, action) {
+      state.showControls = action.payload
+    },
+    setInstruments(state, action) {
+      state.instruments = action.payload
+    },
+    setCameras(state, action) {
+      state.cameras = action.payload
+    },
+    setMode(state, action) {
+      state.mode = action.payload
+    },
+    setCurrentCamera(state, action) {
+      state.currentCamera = action.payload
     }
   },
 });
@@ -83,7 +106,11 @@ export const {
   setMode,
   setIsMenuOpen,
   setCameraRotation,
-  setFovRotation
+  setFovRotation,
+  setShowControls,
+  setCameras,
+  setInstruments,
+  setCurrentCamera
 } = streamSlice.actions;
 
 export default streamSlice.reducer;

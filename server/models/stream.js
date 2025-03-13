@@ -5,11 +5,21 @@ const ambiHRTFmodel = require('./ambihrtf');
 const Schema = mongoose.Schema;
 
 const instrumentSchema = new Schema({
+    _id: {type: mongoose.Schema.Types.ObjectId, auto: true},
     name: {type: String, required: true},
     channel: {type: Number, required: true},
     azimuth: {type: Number},
-    elevation: {type: Number}
+    elevation: {type: Number},
+    point: {type: Object}
 });
+
+const cameraSchema = new Schema({
+    _id: {type: mongoose.Schema.Types.ObjectId, auto: true},
+    name: {type: String, required: true},
+    point: {type: Object, required: true},
+    initialRotation: {type: Number, required: true},
+    
+})
 
 const streamSchema = new Schema({
     title: {type: String, required:true},
@@ -17,7 +27,12 @@ const streamSchema = new Schema({
     createdAt: {type:Date, default: Date.now},
     endDate: {type:Date, default:null},
     instruments: [instrumentSchema],
-    sh_order: {type: Number, required: false}
+    sh_order: {type: Number, required: false},
+    venueDinemsions: {type: Object, required: false},
+    venueImage: {type: String, required: false},
+    venueName: { type: String, required: false},
+    orchestraImage: {type: String, required: false},
+    cameras: [cameraSchema]
 });
 
 // Returns the positions of each instrument in the stream

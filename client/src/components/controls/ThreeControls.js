@@ -129,6 +129,7 @@ export default function ThreeControls({ width, height, depth }) {
           far: 1000,
         }}
         onCreated={({ camera }) => {
+          camera.lookAt(0, 0, 0);
         }}
       >
         <ambientLight intensity={0.6} />

@@ -1,8 +1,10 @@
 import dashjs from "dashjs";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { 
   setStreaming, setTrack, setNumTracks, setTrackNames, 
-  setNumChannels, setMediaURL, setGains, setMasterGain, setRotation, toggleMenu, setPlaying 
+  setNumChannels, setMediaURL, setGains, setMasterGain, setRotation, toggleMenu, setPlaying,
+  setShowControls 
 } from "../store/reducers/streamReducer";
 
 import Fader from "../components/controls/Fader";
@@ -11,6 +13,9 @@ import TrackSelector from "../components/controls/TrackSelector";
 import RotationSelector from "../components/RotationSelector";
 import ThreeSixtyPlayer from "./ThreeSixtyPlayer";
 import Venue from "../components/controls/Venue";
+import Orchestra from "../components/controls/Orchestra"
+import FadeWrapper from "../components/core/FadeWrapper";
+import LargeHeader from "../components/core/LargeHeader";
 
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router-dom"; // Get stream ID from URL
@@ -24,7 +29,7 @@ export default function Stream() {
 
   // Get the stream ID from the URL
   const { id: streamid } = useParams();
-
+  const navigate = useNavigate();
   // Create redux dispatcher and get redux selectors
   const dispatch = useDispatch();
   const streaming = useSelector((state) => state.stream.streaming);
@@ -38,9 +43,13 @@ export default function Stream() {
   const rotation = useSelector((state) => state.stream.rotation);
   const isMenuOpen = useSelector((state) => state.stream.isMenuOpen);
   const playing = useSelector((state) => state.stream.playing);
-  const mode = useSelector((state) => state.stream.mode);
   const cameraRotation = useSelector((state) => state.stream.cameraRotation);
+  const currentCamera = useSelector((state) => state.stream.currentCamera);
   const fovRotation = useSelector((state) => state.stream.fovRotation);
+  const showControls = useSelector((state) => state.stream.showControls);
+  const mode = useSelector((state) => state.stream.mode);
+  const cameras = useSelector((state) => state.stream.cameras);
+  const instruments = useSelector((state) => state.stream.instruments);
 
   // Refs for audio processing
   const mainTrackIndex = useRef(null);
@@ -73,6 +82,7 @@ export default function Stream() {
       try {
         const response = await fetch(mediaURL);
         const mpdText = await response.text();
+        console.log("MPD", mpdText);
       } catch (error) {
         console.error("Error fetching MPD:", error);
       }
@@ -118,6 +128,28 @@ export default function Stream() {
     }
   }, [track]);
 
+  useEffect(() => {
+    let timeout;
+  
+    const handleMouseMove = () => {
+      dispatch(setShowControls(true));
+  
+      // Clear previous timeout and set a new one
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        dispatch(setShowControls(false));
+      }, 3000);
+    };
+  
+    window.addEventListener("mousemove", handleMouseMove);
+  
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      clearTimeout(timeout);
+    };
+  }, []);
+  
+
   // Handle rotation updates and HRTF fetching
   useEffect(() => {
     async function loadHRTFS() {
@@ -138,10 +170,16 @@ export default function Stream() {
   }, [rotation, streaming]);
 
   // Handle play event and initialize audio processing
+  // Rather than onPlay we should instantiate on page load.
+  // Is this because it needs to be playing in order to get the relevant information about the audio?
+  // Update to onMetaDataLoaded
+  // From that we can determine which modes for this stream are available and set the audio chains accordingly.
   const onPlay = async () => {
     if (!streaming || audioIO.current) return;
 
+    // Can we get this information before playing/ready?
     const tracks = player.current.getTracksFor("audio");
+    console.log("TRACKS", tracks)
     dispatch(setNumTracks(tracks.length));
     dispatch(setTrackNames(tracks.map(track => track.lang)));
     dispatch(setNumChannels(tracks.map(track => parseInt(track.audioChannelConfiguration))));
@@ -161,6 +199,7 @@ export default function Stream() {
       audioIO.current.addAudioChain(new MOAudioChain(audioIO.current.getAudioCtx(), 2, 0.5));
       audioIO.current.addAudioChain(new AmbiAudioChain(audioIO.current.getAudioCtx(), 2, 0.5, ambiHrtfs));
 
+      // Select the audio chain.
       if (trackNames[mainTrackIndex.current] === "main") {
         audioIO.current.switchAudioChain(0);
         dispatch(setTrack(mainTrackIndex.current));
@@ -171,14 +210,24 @@ export default function Stream() {
     }
   };
 
+  const dispatchSetTrack = (track) => {
+    dispatch(setTrack(track));
+  };
+
   const handlePlay = () => {
     audioRef.current.play();
     dispatch(setPlaying(true));
   };
 
+  useEffect(() => {
+    // every updates is update the AmbiAudioChain.rotateScene
+    // AmbiAudioChain.rotateScene(cameraRotation);
+  }, [cameraRotation])
+
   if (!streaming) return <p>Loading stream...</p>;
 
   /**
+   *  TODO:
    *  If SSS, display orchestra layout and HRTF rotation controls
    *  If 3DOF, display venue layout controls, and ThreeSixty player.
    *  If 6DOF, display 3d venue layout controls, and have a camera positioned in that particular view?
@@ -191,11 +240,14 @@ export default function Stream() {
         <ThreeSixtyPlayer playerRef={audioRef} />
       </div>
       <div style={{ background: "rgba(255,255,255,0.5)", boxSizing: "border-box", position: "fixed", width: "100%", top: "0", right: "0", padding: "1em", transform: `translate(0, ${isMenuOpen ? "0" : "-100%"})`, transition: "transform 0.5s" }}
-        
       >
         <video
           ref={audioRef}
           onPlay={onPlay}
+          onLoadedMetadata={(e) => {
+            const tracks = player.current.getTracksFor("audio");
+            console.log("metadata tracks", tracks)
+          }}
           crossOrigin="anonymous"
           muted={!playing}
           style={{
@@ -207,7 +259,7 @@ export default function Stream() {
             height: "200px",
           }}
         />
-        <TrackSelector numTracks={numTracks} track={track} setTrack={setTrack} trackNames={trackNames} />
+        <TrackSelector numTracks={numTracks} track={track} setTrack={dispatchSetTrack} trackNames={trackNames} />
         {track === mainTrackIndex.current && (
           <RotationSelector rotation={rotation} setRotation={setRotation} min={-90} max={90} step={5} />
         )}
@@ -220,6 +272,9 @@ export default function Stream() {
             showlabels={showlabels}
           />
           <Fader className="Master" gain={masterGain} setGain={event => setMasterGain(event.target.value)} min={0} max={2} step={0.1} faderlabel="Master" showlabel={true} />
+          { instruments.length > 0 && (
+                <Orchestra editable={false} width={300} />
+          )}
         </div>
         <div style={{
           position: "relative",
@@ -237,16 +292,23 @@ export default function Stream() {
         >
         </div>
       </div>
+      <div style={{ position: "fixed", top: "10px", left: "10px", color: 'white' }}>
+        <FadeWrapper visible={showControls}>
+           <LargeHeader onBack={() => navigate("/")} title={streaming.title} />
+        </FadeWrapper>
+      </div>
       <div style={{
           position: "fixed",
           bottom: "10px",
-          left: "10px"
+          left: "10px",
         }}>Pitch {cameraRotation[0]} Roll {cameraRotation[1]} Yaw {cameraRotation[2]}</div>
-        <div style={{ position: "fixed", bottom: "10px", right: "10px", width: "300px"}}>
-            <Venue imageUrl="/assets/venuelayout.png" editable={false} fov={{
-              yaw: fovRotation,
-            }} />
-        </div>
-    </div>
+        {
+          cameras.length > 0 && (
+              <div style={{ position: "fixed", bottom: "10px", right: "10px", width: "200px"}}>
+                <Venue editable={false} width={200} />
+            </div>
+          )
+         }
+          </div>
   );
 }

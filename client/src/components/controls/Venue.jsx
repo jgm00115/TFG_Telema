@@ -1,52 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DraggableLayout from "./DraggableLayout";
+import { useParams } from "react-router-dom";
+import { setCurrentCamera } from "../../store/reducers/streamReducer"
+import { updateCameras } from "../../api/stream"
 
-export default function Venue({ imageUrl, editable = false, width = 300, fov = null }) {
-  const [cameras, setCameras] = useState([
-    {
-        "name": "conductor",
-        "point": {
-            "x": 0.505,
-            "y": 0.5318888945936232
-        }
-    },
-    {
-        "name": "timpani",
-        "point": {
-            "x": 0.345,
-            "y": 0.7619037839503003
-        }
-    },
-    {
-        "name": "balcony",
-        "point": {
-            "x": 0.50125,
-            "y": 0.038999845972172306
-        }
-    },
-    {
-        "name": "sidestalls",
-        "point": {
-            "x": 0.795,
-            "y": 0.45959850079581044
-        }
-    }
-]);
 
-  const saveCameraLayout = (layout) => {
-    console.log("Saving Camera Layout:", layout);
-  };
+export default function Venue({  editable = false, width = 300 }) {
+
+  // Get id from URL
+  const { id } = useParams();
+  const [streamData, setStreamData] = useState(null);
+  const [cameras, setCameras] = useState([]);
+  const [venueImage, setVenueImage] = useState(null);
+
+  const saveCameras = useCallback(async (newCameras) => {
+      const updatedData = await updateCameras(id, newCameras);
+      if (updatedData) setCameras(updatedData.cameras);
+  }, [id, cameras]);
+
+  const onSelectItem = (cameraName) => {
+    const c = cameras.find((camera) => camera.name === cameraName)
+    setCurrentCamera(c)
+  }
+
+  useEffect(() => {
+      async function fetchStream() {
+        try {
+          const response = await fetch(`/stream/${id}/stream`);
+          const data = await response.json();
+          setStreamData(data);
+          setVenueImage(data.venueImage)
+          setCameras(data.cameras)
+        } catch (error) {
+          console.error("Error fetching stream:", error);
+        }
+      }
+      fetchStream();
+    }, [id]);
+
 
   return (
+    streamData &&
     <DraggableLayout
-      imageUrl={imageUrl}
+      imageUrl={venueImage}
       items={cameras}
       setItems={setCameras}
+      onSelectItem={onSelectItem}
       label="Venue"
-      saveLayout={saveCameraLayout}
+      saveLayout={saveCameras}
       width={width}
       editable={editable}
-      fov={fov}
+      type="venue"
     />
   );
 }

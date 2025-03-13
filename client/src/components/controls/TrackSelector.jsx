@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect} from "react";
 import styled from "styled-components";
 
 // Styled Select Wrapper
@@ -46,9 +46,15 @@ const StyledOption = styled.option`
 `;
 
 export default function TrackSelector({ numTracks, track, setTrack, trackNames }) {
+
   function handleChange(event) {
-    setTrack(event.target.value);
+    console.log("handle change", event.target.value)
+    setTrack(Number(event.target.value));
   }
+
+  useEffect(() => {
+    console.log("Track changed", track)
+  }, [track])
 
   return (
     <SelectWrapper>

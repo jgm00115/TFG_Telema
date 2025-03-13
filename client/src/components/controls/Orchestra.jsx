@@ -1,18 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback} from "react";
+import { useParams } from "react-router-dom";
 import DraggableLayout from "./DraggableLayout";
+import { fetchStream, updateInstruments } from "../../api/stream";
 
-export default function Orchestra({ imageUrl, editable = false }) {
-  const [instruments, setInstruments] = useState([
-    { name: "violin", point: { x: 0.29, y: 0.76 } },
-    { name: "cello", point: { x: 0.67, y: 0.77 } },
-    { name: "flute", point: { x: 0.39, y: 0.52 } },
-    { name: "clarinet", point: { x: 0.57, y: 0.50 } },
-    { name: "trumpet", point: { x: 0.50, y: 0.30 } },
-  ]);
+export default function Orchestra({ editable = false, width = 300}) {
 
-  const saveOrchestraLayout = (layout) => {
-    console.log("Saving Orchestra Layout:", layout);
-  };
+   const { id } = useParams();
+   const [streamData, setStreamData] = useState(null);
+   const [instruments, setInstruments] = useState([]);
+   const [imageUrl, setImageUrl] = useState(null);
+
+   const saveInstruments = useCallback(async () => {
+    const updatedData = await updateInstruments(id, instruments);
+    if (updatedData) setInstruments(updatedData.instruments);
+  }, [id, instruments]);
+
+
+  useEffect(() => {
+    async function loadStreamData() {
+      const data = await fetchStream(id);
+      if (!data) return;
+
+      const instruments = data.instruments.map((instrument, i) => ({
+        ...instrument,
+        point: instrument.point ?? { x: (i / data.instruments.length) + 0.03, y: 0.1 },
+      }));
+
+      setStreamData(data);
+      setInstruments(instruments);
+      setImageUrl(data.orchestraImage);
+    }
+
+    loadStreamData();
+  }, [id]);
 
   return (
     <DraggableLayout
@@ -20,8 +40,10 @@ export default function Orchestra({ imageUrl, editable = false }) {
       items={instruments}
       setItems={setInstruments}
       label="Orchestra"
-      saveLayout={saveOrchestraLayout}
+      saveLayout={saveInstruments}
       editable={editable}
+      type="orchestra"
+      width={width}
     />
   );
 }

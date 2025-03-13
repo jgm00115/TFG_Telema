@@ -32,6 +32,8 @@ const VideoSphereManual = ({ videoElement, onCameraRotate }) => {
       1000
     );
     camera.position.set(0, 0, 0.1);  // Place camera slightly off center
+    camera.lookAt(new THREE.Vector3(0,0,-1));  // Look at the center of the sphere
+    camera.rotation.set(0, Math.PI, 0);  // Reset camera rotation 
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
@@ -68,6 +70,8 @@ const VideoSphereManual = ({ videoElement, onCameraRotate }) => {
     });
 
     const sphere = new THREE.Mesh(geometry, material);
+    sphere.rotation.y = Math.PI * 1.5;
+
     scene.add(sphere);
 
     // 4. Set up OrbitControls
@@ -89,15 +93,26 @@ const VideoSphereManual = ({ videoElement, onCameraRotate }) => {
       if (cameraRef.current) {
         // x = pitch, y = roll, z = yaw
         const { x, y, z } = cameraRef.current.rotation;
+        
         const direction = new THREE.Vector3();
         cameraRef.current.getWorldDirection(direction);
+    
         const forwardX = direction.x;
         const forwardZ = direction.z;
-        const rotationYaw = Math.atan2(forwardX, forwardZ);
+    
+        let rotationYaw = Math.atan2(forwardX, forwardZ);
+  
+        rotationYaw -= Math.PI * 1.5;
+    
+        // Keep yaw in range [-π, π] to prevent weird jumps
+        if (rotationYaw < -Math.PI) rotationYaw += 2 * Math.PI;
+        if (rotationYaw > Math.PI) rotationYaw -= 2 * Math.PI;
+    
         dispatch(setCameraRotation([x, y, z]));
         dispatch(setFovRotation(rotationYaw));
       }
     }, 500); // Runs every 500ms
+    
   
 
     animate();  // Start the animation loop

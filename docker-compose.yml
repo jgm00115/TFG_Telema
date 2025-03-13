@@ -13,11 +13,13 @@ services:
       - WATCHPACK_POLLING=true
   backend:
     build: ./server
-    # restart: always
+    restart: always
     ports:
       - '8080:8080'
     volumes:
-      - media:/usr/src/media
+      - ./server:/usr/src/app  # Mount local backend code
+      - /usr/src/app/node_modules  # Prevent overwriting node_modules
+      - media:/usr/src/media  # Keep media as a named volume
     environment:
       - MONGO_URL=mongodb://admin:admin@mongo:27017/App  #INIT_DB_USER Y PASSWORD
     depends_on:

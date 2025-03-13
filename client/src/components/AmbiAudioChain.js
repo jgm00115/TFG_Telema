@@ -1,4 +1,4 @@
-import SceneRotator from "./controls/SceneRotator.js";
+import SceneRotator from "./SceneRotator.js";
 import HOAHRTFConvolver from "./HOAHRTFConvolver.js";
 export class AmbiAudioChain {
 
